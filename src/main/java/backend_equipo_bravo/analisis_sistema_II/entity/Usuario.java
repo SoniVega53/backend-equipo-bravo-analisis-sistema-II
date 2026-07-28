@@ -28,6 +28,9 @@ public class Usuario {
     @Column(name = "idsucursal")
     private Integer idSucursal;
 
+    @Column(name = "idrole")
+    private Integer idRole;
+
     @Column(name = "ultimafechaingreso")
     private LocalDateTime ultimaFechaIngreso;
 

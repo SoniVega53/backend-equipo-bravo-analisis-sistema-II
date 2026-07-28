@@ -24,19 +24,22 @@ public class AuthService {
     @Autowired
     private AuditoriaService auditoriaService;
 
+    @Autowired
+    private JwtService jwtService;
+
     public String login(String idUsuario, String passwordPlano, String ip, String userAgent) {
 
         Optional<Usuario> userOpt = usuarioRepository.findByIdUsuario(idUsuario);
 
         if (userOpt.isEmpty()) {
-            auditoriaService.registrarIntento(idUsuario, 5, ip, userAgent, null); // 5 = Usuario no existe
+            auditoriaService.registrarIntento(idUsuario, 5, ip, userAgent, null);
             throw new RuntimeException("Credenciales inválidas");
         }
 
         Usuario usuario = userOpt.get();
 
         if (usuario.getIdStatusUsuario() != 1) {
-            auditoriaService.registrarIntento(idUsuario, 4, ip, userAgent, null); // 4 = Usuario inactivo
+            auditoriaService.registrarIntento(idUsuario, 4, ip, userAgent, null);
             throw new RuntimeException("El usuario se encuentra inactivo o bloqueado. Contacte al administrador.");
         }
 
@@ -49,24 +52,26 @@ public class AuthService {
 
             if (intentosActuales >= intentosPermitidos) {
                 usuario.setIdStatusUsuario(2);
+                usuario.setSesionActual(null);
                 usuarioRepository.save(usuario);
-                auditoriaService.registrarIntento(idUsuario, 3, ip, userAgent, null); // 3 = Bloqueado por intentos
+                auditoriaService.registrarIntento(idUsuario, 3, ip, userAgent, null);
                 throw new RuntimeException("Su cuenta ha sido bloqueada por exceder el número de intentos configurados.");
             } else {
                 usuarioRepository.save(usuario);
-                auditoriaService.registrarIntento(idUsuario, 2, ip, userAgent, null); // 2 = Password incorrecto
+                auditoriaService.registrarIntento(idUsuario, 2, ip, userAgent, null);
                 throw new RuntimeException("Credenciales inválidas. Intento " + intentosActuales + " de " + intentosPermitidos + ".");
             }
         }
 
         usuario.setIntentosDeAcceso(0);
         usuario.setUltimaFechaIngreso(LocalDateTime.now());
-        String tokenSimulado = "jwt-token-generado-aqui";
-        usuario.setSesionActual(tokenSimulado);
+        String token = jwtService.generarToken(usuario.getIdUsuario(), usuario.getIdRole());
+
+        usuario.setSesionActual(token);
         usuarioRepository.save(usuario);
 
-        auditoriaService.registrarIntento(idUsuario, 1, ip, userAgent, tokenSimulado); // 1 = Acceso concedido
+        auditoriaService.registrarIntento(idUsuario, 1, ip, userAgent, token);
 
-        return tokenSimulado;
+        return token;
     }
 }
