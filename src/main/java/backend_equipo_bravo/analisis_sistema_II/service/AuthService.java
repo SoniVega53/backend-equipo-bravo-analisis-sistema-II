@@ -1,6 +1,8 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
 import backend_equipo_bravo.analisis_sistema_II.entity.Usuario;
+import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
+import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError;
 import backend_equipo_bravo.analisis_sistema_II.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,14 +35,17 @@ public class AuthService {
 
         if (userOpt.isEmpty()) {
             auditoriaService.registrarIntento(idUsuario, 5, ip, userAgent, null);
-            throw new RuntimeException("Credenciales inválidas");
+            throw new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND);
         }
 
         Usuario usuario = userOpt.get();
 
         if (usuario.getIdStatusUsuario() != 1) {
             auditoriaService.registrarIntento(idUsuario, 4, ip, userAgent, null);
-            throw new RuntimeException("El usuario se encuentra inactivo o bloqueado. Contacte al administrador.");
+            throw new BusinessException(
+                    usuario.getIdStatusUsuario() == 2 ? UsuarioError.AUTH_USER_BLOCKED :
+                            UsuarioError.AUTH_USER_INACTIVE
+            );
         }
 
         if (!passwordEncoder.matches(passwordPlano, usuario.getPassword())) {
@@ -55,11 +60,11 @@ public class AuthService {
                 usuario.setSesionActual(null);
                 usuarioRepository.save(usuario);
                 auditoriaService.registrarIntento(idUsuario, 3, ip, userAgent, null);
-                throw new RuntimeException("Su cuenta ha sido bloqueada por exceder el número de intentos configurados.");
+                throw new BusinessException(UsuarioError.AUTH_USER_BLOCKED_ATTEMPTS);
             } else {
                 usuarioRepository.save(usuario);
                 auditoriaService.registrarIntento(idUsuario, 2, ip, userAgent, null);
-                throw new RuntimeException("Credenciales inválidas. Intento " + intentosActuales + " de " + intentosPermitidos + ".");
+                throw new BusinessException(UsuarioError.AUTH_INVALID_CREDENTIALS_ATTEMPTS, intentosActuales, intentosPermitidos);
             }
         }
 

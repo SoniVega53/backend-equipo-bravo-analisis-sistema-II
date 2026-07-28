@@ -2,6 +2,8 @@ package backend_equipo_bravo.analisis_sistema_II.service;
 
 import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdateRequest;
 import backend_equipo_bravo.analisis_sistema_II.entity.Usuario;
+import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
+import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError;
 import backend_equipo_bravo.analisis_sistema_II.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,12 +22,12 @@ public class UsuarioService {
         String idUsuarioEjecutor = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Usuario ejecutor = usuarioRepository.findByIdUsuario(idUsuarioEjecutor)
-                .orElseThrow(() -> new RuntimeException("El usuario ejecutor no existe."));
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
 
         boolean isAdmin = ejecutor.getIdRole() == 1;
 
         if (!idUsuarioEjecutor.equals(idUsuarioActualizar) && !isAdmin) {
-            throw new RuntimeException("Acceso denegado: No tienes permisos para editar el perfil de otro usuario.");
+            throw new BusinessException(UsuarioError.AUTH_UNAUTHORIZED);
         }
 
         boolean intentaCambiarSensibles = request.getIdRole() != null ||
@@ -33,11 +35,11 @@ public class UsuarioService {
                 request.getIntentosDeAcceso() != null;
 
         if (intentaCambiarSensibles && !isAdmin) {
-            throw new RuntimeException("Acceso denegado: Solo un administrador puede modificar el rol, el estado o los intentos de acceso.");
+            throw new BusinessException(UsuarioError.AUTH_UNAUTHORIZED);
         }
 
         Usuario usuarioDestino = usuarioRepository.findByIdUsuario(idUsuarioActualizar)
-                .orElseThrow(() -> new RuntimeException("El usuario a actualizar no existe."));
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
 
         if (request.getNombre() != null) usuarioDestino.setNombre(request.getNombre());
         if (request.getApellido() != null) usuarioDestino.setApellido(request.getApellido());

@@ -1,6 +1,8 @@
 package backend_equipo_bravo.analisis_sistema_II.controller;
 
 import backend_equipo_bravo.analisis_sistema_II.dto.LoginRequest;
+import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
+import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCode;
 import backend_equipo_bravo.analisis_sistema_II.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -15,7 +17,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
-public class AuthController {
+public class AuthController extends BaseController {
 
     @Autowired
     private AuthService authService;
@@ -23,25 +25,22 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
 
-        Map<String, Object> response = new HashMap<>();
-
         String ip = httpRequest.getRemoteAddr();
         String userAgent = httpRequest.getHeader("User-Agent");
 
         try {
             String token = authService.login(request.getIdUsuario(), request.getPassword(), ip, userAgent);
 
-            response.put("exito", true);
-            response.put("mensaje", "Autenticación exitosa");
-            response.put("token", token);
+            Map<String, Object> tokenData = Map.of("token", token);
+            return success(tokenData, SuccessCode.AUTH_LOGIN_SUCCESS);
 
-            return new ResponseEntity<>(response, HttpStatus.OK);
-
-        } catch (RuntimeException e) {
-            response.put("exito", false);
-            response.put("mensaje", e.getMessage());
-
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        } catch (BusinessException e) {
+            return error(
+                    e.getCodigoNumerico(),
+                    e.getCodigoTexto(),
+                    e.getMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
         }
     }
 }

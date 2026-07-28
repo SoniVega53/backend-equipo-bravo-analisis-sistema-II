@@ -25,7 +25,7 @@ public class JwtService {
     public String generarToken(String idUsuario, Integer idRole) {
         return Jwts.builder()
                 .setSubject(idUsuario)
-                .claim("role", idRole) // Enviamos el rol para que el Frontend lo lea
+                .claim("role", idRole)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
