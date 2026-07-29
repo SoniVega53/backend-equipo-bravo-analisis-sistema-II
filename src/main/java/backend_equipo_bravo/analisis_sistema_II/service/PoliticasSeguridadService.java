@@ -5,7 +5,6 @@ import backend_equipo_bravo.analisis_sistema_II.entity.Sucursal;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.EmpresaError;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.SucursalError;
-import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError;
 import backend_equipo_bravo.analisis_sistema_II.repository.EmpresaRepository;
 import backend_equipo_bravo.analisis_sistema_II.repository.SucursalRepository;
 import org.springframework.beans.factory.annotation.Autowired;

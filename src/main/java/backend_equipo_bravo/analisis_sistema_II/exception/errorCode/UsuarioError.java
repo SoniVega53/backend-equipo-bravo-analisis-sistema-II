@@ -9,6 +9,7 @@ public enum UsuarioError {
     AUTH_USER_BLOCKED_ATTEMPTS(104, "AUTH_USER_BLOCKED_ATTEMPTS", "Usuario bloqueado por exceder los intentos de acceso.", "Superó el límite de intentos permitidos y su estatus cambió a bloqueado."),
     AUTH_TOKEN_EXPIRED(105, "AUTH_TOKEN_EXPIRED", "La sesión ha expirado. Por favor, ingrese de nuevo.", "El JWT enviado ya pasó su tiempo de vida configurado."),
     AUTH_UNAUTHORIZED(106, "AUTH_UNAUTHORIZED", "Acceso denegado: No tiene permisos suficientes.", "El usuario intenta realizar una acción o entrar a un módulo para el que no tiene rol."),
+    AUTH_NO_AUTHORIZED(107, "AUTH_NO_AUTHORIZED", "Usuario no logeado correctamente.", "No existe usuario."),
     // Nuevo error con formato dinámico para los intentos
     AUTH_INVALID_CREDENTIALS_ATTEMPTS(107, "AUTH_INVALID_CREDENTIALS_ATTEMPTS", "Credenciales inválidas. Intento %d de %d.", "El usuario introdujo una contraseña incorrecta y se incrementó el contador de intentos.");
 
