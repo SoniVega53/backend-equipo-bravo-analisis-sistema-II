@@ -41,11 +41,10 @@ public class AuthService {
         Usuario usuario = userOpt.get();
 
         if (usuario.getIdStatusUsuario() != 1) {
-            auditoriaService.registrarIntento(idUsuario, 4, ip, userAgent, null);
-            throw new BusinessException(
-                    usuario.getIdStatusUsuario() == 2 ? UsuarioError.AUTH_USER_BLOCKED :
-                            UsuarioError.AUTH_USER_INACTIVE
-            );
+            boolean isInactive = usuario.getIdStatusUsuario() == 3;
+
+            auditoriaService.registrarIntento(idUsuario, isInactive ? 4 : 2, ip, userAgent, null);
+            throw new BusinessException(isInactive ? UsuarioError.AUTH_USER_INACTIVE : UsuarioError.AUTH_USER_BLOCKED);
         }
 
         if (!passwordEncoder.matches(passwordPlano, usuario.getPassword())) {
