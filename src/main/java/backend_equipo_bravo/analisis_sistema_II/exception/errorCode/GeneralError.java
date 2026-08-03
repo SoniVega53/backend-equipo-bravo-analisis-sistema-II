@@ -2,7 +2,7 @@ package backend_equipo_bravo.analisis_sistema_II.exception.errorCode;
 
 public enum GeneralError {
 
-    ERROR_SERVICE(400, "ERROR_SERVICE", "Error servicio.", "ALgo salio mal revise su infomracion.");
+    ERROR_SERVICE(400, "ERROR_SERVICE", "Error servicio.", "Algo salio mal revise su infomracion.");
 
     private final int codigoNumerico;
     private final String codigoTexto;
