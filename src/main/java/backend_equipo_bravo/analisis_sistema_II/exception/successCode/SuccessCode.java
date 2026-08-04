@@ -5,6 +5,8 @@ public enum SuccessCode {
     AUTH_LOGIN_SUCCESS(200, "AUTH_LOGIN_SUCCESS", "Autenticación exitosa."),
     USER_CREATED_SUCCESS(201, "USER_CREATED_SUCCESS", "El usuario se creó correctamente."),
     USER_UPDATED_SUCCESS(200, "USER_UPDATED_SUCCESS", "El perfil se actualizó con éxito."),
+    USER_POLICY_SUCCESS(200, "USER_POLICY_SUCCESS", "Politicas recolectadas correctamente."),
+    USER_UPDATED_PASS_SUCCESS(200, "USER_UPDATED_PASS_SUCCESS", "Contraseña actualizada correctamente."),
     USER_AUTH_SUCCESS(203, "USER_AUTH_SUCCESS", "Consulta exitosa."),
     MENU_AUTH_SUCCESS(204, "MENU_AUTH_SUCCESS", "Consulta exitosa."),
     SUCURSAL_DELETED_SUCCESS(200, "SUCURSAL_DELETED_SUCCESS", "La sucursal fue eliminada correctamente."),

@@ -1,5 +1,6 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
+import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdatePasswordRequest;
 import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdateRequest;
 import backend_equipo_bravo.analisis_sistema_II.entity.Usuario;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
@@ -7,6 +8,7 @@ import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError
 import backend_equipo_bravo.analisis_sistema_II.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,6 +19,9 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public Usuario actualizarUsuario(String idUsuarioActualizar, UsuarioUpdateRequest request) {
         String idUsuarioEjecutor = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -57,5 +62,38 @@ public class UsuarioService {
         usuarioDestino.setUsuarioModificacion(idUsuarioEjecutor);
 
         return usuarioRepository.save(usuarioDestino);
+    }
+
+
+    public Usuario actualizarPrimerIngreso(String password){
+        String idUsuarioLog = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLog)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        if (password == null || password.isEmpty()) {
+            throw new BusinessException(UsuarioError.AUTH_PASSWORD_EMPTY);
+        }
+
+        if (usuario.getRequiereCambiarPassword() != 1){
+            throw new BusinessException(UsuarioError.AUTH_NOT_CHANGE);
+        }
+        if (passwordEncoder.matches(password, usuario.getPassword())) {
+            throw new BusinessException(UsuarioError.AUTH_PASSWORD_EQUALS);
+        }
+        usuario.setPassword(passwordEncoder.encode(password));
+        usuario.setUltimaFechaCambioPassword(LocalDateTime.now());
+        usuario.setRequiereCambiarPassword(0);
+
+        return usuarioRepository.save(usuario);
+    }
+
+    public boolean getChangePassword(){
+        String idUsuarioLog = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLog)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        return usuario.getRequiereCambiarPassword() == 1;
     }
 }

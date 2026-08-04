@@ -1,5 +1,6 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
+import backend_equipo_bravo.analisis_sistema_II.dto.PasswordPolicyDto;
 import backend_equipo_bravo.analisis_sistema_II.entity.Empresa;
 import backend_equipo_bravo.analisis_sistema_II.entity.Sucursal;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
@@ -29,5 +30,59 @@ public class PoliticasSeguridadService {
         return empresa.getPasswordIntentosAntesDeBloquear() != null
                 ? empresa.getPasswordIntentosAntesDeBloquear()
                 : 3;
+    }
+
+
+    public PasswordPolicyDto obtenerPoliticaPassword() {
+        Empresa empresa = empresaRepository.findById(1)
+                .orElseThrow(() -> new RuntimeException("Configuración de empresa no encontrada"));
+
+        StringBuilder regex = new StringBuilder("^");
+        StringBuilder mensaje = new StringBuilder("La contraseña debe tener");
+
+        int minMayus = nvl(empresa.getPasswordCantidadMayusculas());
+        if (minMayus > 0) {
+            regex.append("(?=(?:.*?[A-Z]){").append(minMayus).append("})");
+            mensaje.append(", ").append(minMayus).append(" mayúscula(s)");
+        }
+
+        int minMinus = nvl(empresa.getPasswordCantidadMinusculas());
+        if (minMinus > 0) {
+            regex.append("(?=(?:.*?[a-z]){").append(minMinus).append("})");
+            mensaje.append(", ").append(minMinus).append(" minúscula(s)");
+        }
+
+        int minNumeros = nvl(empresa.getPasswordCantidadNumeros());
+        if (minNumeros > 0) {
+            regex.append("(?=(?:.*?\\d){").append(minNumeros).append("})");
+            mensaje.append(", ").append(minNumeros).append(" número(s)");
+        }
+
+        int minEspeciales = nvl(empresa.getPasswordCantidadCaracteresEspeciales());
+        if (minEspeciales > 0) {
+            regex.append("(?=(?:.*?[!@#$%^&*()_+=\\[\\]{};':\"\\\\|,.<>\\/?-]){").append(minEspeciales).append("})");
+            mensaje.append(", ").append(minEspeciales).append(" carácter(es) especial(es)");
+        }
+
+        int largoMinimo = nvl(empresa.getPasswordLargo(), 8);
+        regex.append(".{").append(largoMinimo).append(",}$");
+
+        mensaje.append(" y un mínimo de ").append(largoMinimo).append(" caracteres.");
+
+        String mensajeFinal = mensaje.toString().replace("tener, ", "tener al menos: ");
+
+        return PasswordPolicyDto.builder()
+                .regex(regex.toString())
+                .mensajeValidacion(mensajeFinal)
+                .largoMinimo(largoMinimo)
+                .build();
+    }
+
+    private int nvl(Integer valor) {
+        return valor != null ? valor : 0;
+    }
+
+    private int nvl(Integer valor, int valorPorDefecto) {
+        return valor != null ? valor : valorPorDefecto;
     }
 }

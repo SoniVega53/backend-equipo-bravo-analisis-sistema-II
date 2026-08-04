@@ -10,7 +10,10 @@ public enum UsuarioError {
     AUTH_TOKEN_EXPIRED(105, "AUTH_TOKEN_EXPIRED", "La sesión ha expirado. Por favor, ingrese de nuevo.", "El JWT enviado ya pasó su tiempo de vida configurado."),
     AUTH_UNAUTHORIZED(106, "AUTH_UNAUTHORIZED", "Acceso denegado: No tiene permisos suficientes.", "El usuario intenta realizar una acción o entrar a un módulo para el que no tiene rol."),
     AUTH_NO_AUTHORIZED(107, "AUTH_NO_AUTHORIZED", "Usuario no logeado correctamente.", "No existe usuario."),
-    AUTH_INVALID_CREDENTIALS_ATTEMPTS(109, "AUTH_INVALID_CREDENTIALS_ATTEMPTS", "Credenciales inválidas. Intento %d de %d.", "El usuario introdujo una contraseña incorrecta y se incrementó el contador de intentos.");
+    AUTH_INVALID_CREDENTIALS_ATTEMPTS(109, "AUTH_INVALID_CREDENTIALS_ATTEMPTS", "Credenciales inválidas. Intento %d de %d.", "El usuario introdujo una contraseña incorrecta y se incrementó el contador de intentos."),
+    AUTH_NOT_CHANGE(1400, "AUTH_NOT_CHANGE", "Usuario No Necesita Cambiar Contraseña", ""),
+    AUTH_PASSWORD_EMPTY(140, "AUTH_PASSWORD_EMPTY", "Contraseña Vacia", ""),
+    AUTH_PASSWORD_EQUALS(1401, "AUTH_PASSWORD_EQUALS", "Contraseña es igual a la anterior", "La nueva contraseña no puede ser igual a la anterior");
 
     private final int codigoNumerico;
     private final String codigoTexto;
