@@ -1,6 +1,7 @@
 package backend_equipo_bravo.analisis_sistema_II.controller;
 
 import backend_equipo_bravo.analisis_sistema_II.dto.PasswordPolicyDto;
+import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioPerfilRequest;
 import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdatePasswordRequest;
 import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdateRequest;
 import backend_equipo_bravo.analisis_sistema_II.entity.Usuario;
@@ -72,6 +73,34 @@ public class UsuarioController extends BaseController{
                 data.put("policy",policyDto);
             }
             return success(data, SuccessCode.AUTH_LOGIN_SUCCESS);
+        } catch (BusinessException e) {
+            return error(
+                    e.getCodigoNumerico(),
+                    e.getCodigoTexto(),
+                    e.getMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+    }
+
+    @GetMapping("/perfil")
+    public ResponseEntity<Map<String, Object>> getDataPerfil() {
+        try {
+            return success(usuarioService.getDataPerfil(), SuccessCode.AUTH_PERFIL_SUCCESS);
+        } catch (BusinessException e) {
+            return error(
+                    e.getCodigoNumerico(),
+                    e.getCodigoTexto(),
+                    e.getMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+    }
+
+    @PutMapping("/perfilUpdate")
+    public ResponseEntity<Map<String, Object>> putDataPerfil(@RequestBody UsuarioPerfilRequest request) {
+        try {
+            return success(usuarioService.actualizarPerfil(request), SuccessCode.AUTH_PERFIL_SUCCESS);
         } catch (BusinessException e) {
             return error(
                     e.getCodigoNumerico(),

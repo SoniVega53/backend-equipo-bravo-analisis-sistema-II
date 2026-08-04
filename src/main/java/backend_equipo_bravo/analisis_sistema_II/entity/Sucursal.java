@@ -16,4 +16,7 @@ public class Sucursal {
 
     @Column(name = "idempresa")
     private Integer idEmpresa;
+
+    @Column(name = "nombre")
+    private String nombre;
 }

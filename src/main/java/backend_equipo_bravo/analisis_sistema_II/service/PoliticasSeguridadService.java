@@ -3,12 +3,16 @@ package backend_equipo_bravo.analisis_sistema_II.service;
 import backend_equipo_bravo.analisis_sistema_II.dto.PasswordPolicyDto;
 import backend_equipo_bravo.analisis_sistema_II.entity.Empresa;
 import backend_equipo_bravo.analisis_sistema_II.entity.Sucursal;
+import backend_equipo_bravo.analisis_sistema_II.entity.Usuario;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.EmpresaError;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.SucursalError;
+import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError;
 import backend_equipo_bravo.analisis_sistema_II.repository.EmpresaRepository;
 import backend_equipo_bravo.analisis_sistema_II.repository.SucursalRepository;
+import backend_equipo_bravo.analisis_sistema_II.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +23,9 @@ public class PoliticasSeguridadService {
 
     @Autowired
     private EmpresaRepository empresaRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     public int obtenerIntentosPermitidosPorSucursal(Integer idSucursal) {
         Sucursal sucursal = sucursalRepository.findById(idSucursal)
@@ -34,8 +41,18 @@ public class PoliticasSeguridadService {
 
 
     public PasswordPolicyDto obtenerPoliticaPassword() {
-        Empresa empresa = empresaRepository.findById(1)
-                .orElseThrow(() -> new RuntimeException("Configuración de empresa no encontrada"));
+        String idUsuarioLog = SecurityContextHolder.getContext().getAuthentication().getName();
+
+
+        Integer idSucursal = usuarioRepository
+                .findIdSucursalByIdUsuario(idUsuarioLog)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        Sucursal sucursal = sucursalRepository.findById(idSucursal)
+                .orElseThrow(() -> new BusinessException(SucursalError.SUCURSAL_NOT_FOUND));
+
+        Empresa empresa = empresaRepository.findById(sucursal.getIdEmpresa())
+                .orElseThrow(() -> new BusinessException(EmpresaError.EMPRESA_NOT_FOUND));
 
         StringBuilder regex = new StringBuilder("^");
         StringBuilder mensaje = new StringBuilder("La contraseña debe tener");
