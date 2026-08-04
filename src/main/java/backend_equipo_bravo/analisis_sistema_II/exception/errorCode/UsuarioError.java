@@ -4,6 +4,7 @@ public enum UsuarioError {
 
     AUTH_USER_NOT_FOUND(101, "AUTH_USER_NOT_FOUND", "El usuario ingresado no existe.", "El ID de usuario proporcionado no se encuentra en la base de datos."),
     AUTH_INVALID_PASSWORD(102, "AUTH_INVALID_PASSWORD", "Credenciales inválidas.", "La contraseña ingresada no coincide con el hash almacenado."),
+    AUTH_INVALID_POLICY(109, "AUTH_INVALID_POLICY", "Contraseña inválidas.", "La contraseña ingresada no cumple las normas de la empresa."),
     AUTH_USER_INACTIVE(103, "AUTH_USER_INACTIVE", "El usuario se encuentra inactivo.", "El usuario tiene un estatus que no le permite ingresar al sistema."),
     AUTH_USER_BLOCKED(108, "AUTH_USER_BLOCKED", "El usuario se encuentra bloqueado.", "El usuario tiene un estatus que no le permite ingresar al sistema."),
     AUTH_USER_BLOCKED_ATTEMPTS(104, "AUTH_USER_BLOCKED_ATTEMPTS", "Usuario bloqueado por exceder los intentos de acceso.", "Superó el límite de intentos permitidos y su estatus cambió a bloqueado."),
@@ -13,6 +14,7 @@ public enum UsuarioError {
     AUTH_INVALID_CREDENTIALS_ATTEMPTS(109, "AUTH_INVALID_CREDENTIALS_ATTEMPTS", "Credenciales inválidas. Intento %d de %d.", "El usuario introdujo una contraseña incorrecta y se incrementó el contador de intentos."),
     AUTH_NOT_CHANGE(1400, "AUTH_NOT_CHANGE", "Usuario No Necesita Cambiar Contraseña", ""),
     AUTH_PASSWORD_EMPTY(140, "AUTH_PASSWORD_EMPTY", "Contraseña Vacia", ""),
+    AUTH_PASSWORD_NOAUTH(143, "AUTH_PASSWORD_NOAUTH", "Contraseña actual no valida", "Contraseña es incorrecta"),
     AUTH_PASSWORD_EQUALS(1401, "AUTH_PASSWORD_EQUALS", "Contraseña es igual a la anterior", "La nueva contraseña no puede ser igual a la anterior");
 
     private final int codigoNumerico;

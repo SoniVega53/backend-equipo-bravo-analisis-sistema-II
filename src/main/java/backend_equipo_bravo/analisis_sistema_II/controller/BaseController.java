@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public abstract class BaseController {
 
@@ -35,5 +37,17 @@ public abstract class BaseController {
         response.put("codigoTexto", codigoTexto);
         response.put("mensaje", mensaje);
         return new ResponseEntity<>(response, status);
+    }
+
+    protected boolean validarPasswordConRegex(String password, String regexPattern) {
+        if (password == null || regexPattern == null) {
+            return false;
+        }
+
+        try {
+            return Pattern.compile(regexPattern).matcher(password).matches();
+        } catch (PatternSyntaxException e) {
+            return false;
+        }
     }
 }

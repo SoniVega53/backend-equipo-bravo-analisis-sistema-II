@@ -1,14 +1,17 @@
 package backend_equipo_bravo.analisis_sistema_II.controller;
 
 import backend_equipo_bravo.analisis_sistema_II.dto.PasswordPolicyDto;
+import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioPasswordChangeRequest;
 import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioPerfilRequest;
 import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdatePasswordRequest;
 import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdateRequest;
 import backend_equipo_bravo.analisis_sistema_II.entity.Usuario;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
+import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError;
 import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCode;
 import backend_equipo_bravo.analisis_sistema_II.service.PoliticasSeguridadService;
 import backend_equipo_bravo.analisis_sistema_II.service.UsuarioService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,6 +76,30 @@ public class UsuarioController extends BaseController{
                 data.put("policy",policyDto);
             }
             return success(data, SuccessCode.AUTH_LOGIN_SUCCESS);
+        } catch (BusinessException e) {
+            return error(
+                    e.getCodigoNumerico(),
+                    e.getCodigoTexto(),
+                    e.getMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+    }
+
+    @PutMapping("/changePassword")
+    public ResponseEntity<Map<String, Object>> cambioPassword(@RequestBody UsuarioPasswordChangeRequest request, HttpServletRequest httpRequest) {
+        String ip = httpRequest.getRemoteAddr();
+        String userAgent = httpRequest.getHeader("User-Agent");
+        try {
+            PasswordPolicyDto policyDto = empresaService.obtenerPoliticaPassword();
+
+            if (!validarPasswordConRegex(request.getPasswordNew(),policyDto.getRegex())) {
+                throw new BusinessException(UsuarioError.AUTH_INVALID_POLICY);
+            }
+
+            usuarioService.cambioPassword(request.getPasswordOld(), request.getPasswordNew(),ip,userAgent);
+
+            return success("Cambio Exitoso", SuccessCode.AUTH_LOGIN_SUCCESS);
         } catch (BusinessException e) {
             return error(
                     e.getCodigoNumerico(),

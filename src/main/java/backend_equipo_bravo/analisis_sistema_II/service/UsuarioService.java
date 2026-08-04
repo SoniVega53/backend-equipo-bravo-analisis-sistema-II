@@ -45,6 +45,12 @@ public class UsuarioService {
     @Autowired
     private GeneroRepository generoRepository;
 
+    @Autowired
+    private PoliticasSeguridadService politicasService;
+
+    @Autowired
+    private AuditoriaService auditoriaService;
+
     public Usuario actualizarUsuario(String idUsuarioActualizar, UsuarioUpdateRequest request) {
         String idUsuarioEjecutor = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -168,6 +174,51 @@ public class UsuarioService {
         if (request.getTelefonoMovil() != null) usuario.setTelefonoMovil(request.getTelefonoMovil());
         if (request.getIdGenero() != null) usuario.setIdGenero(request.getIdGenero());
 
+
+        return usuarioRepository.save(usuario);
+    }
+
+    public Usuario cambioPassword(String passwordOld, String passwordNew,String ip, String userAgent) {
+        String idUsuarioLog = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLog)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        if (passwordOld == null || passwordOld.isEmpty()) {
+            throw new BusinessException(UsuarioError.AUTH_PASSWORD_EMPTY);
+        }
+
+        if (passwordNew == null || passwordNew.isEmpty()) {
+            throw new BusinessException(UsuarioError.AUTH_PASSWORD_EMPTY);
+        }
+
+        if (!passwordEncoder.matches(passwordOld, usuario.getPassword())) {
+            int intentosActuales = usuario.getIntentosDeAcceso() != null ? usuario.getIntentosDeAcceso() : 0;
+            intentosActuales++;
+            usuario.setIntentosDeAcceso(intentosActuales);
+
+            int intentosPermitidos = politicasService.obtenerIntentosPermitidosPorSucursal(usuario.getIdSucursal());
+
+            if (intentosActuales >= intentosPermitidos) {
+                usuario.setIdStatusUsuario(2);
+                usuario.setSesionActual(null);
+                usuarioRepository.save(usuario);
+                auditoriaService.registrarIntento(idUsuarioLog, 3, ip, userAgent, null);
+                throw new BusinessException(UsuarioError.AUTH_USER_BLOCKED_ATTEMPTS);
+            } else {
+                usuarioRepository.save(usuario);
+                auditoriaService.registrarIntento(idUsuarioLog, 2, ip, userAgent, null);
+                throw new BusinessException(UsuarioError.AUTH_INVALID_CREDENTIALS_ATTEMPTS, intentosActuales, intentosPermitidos);
+            }
+        }
+
+        if (passwordOld.equals(passwordNew)) {
+            throw new BusinessException(UsuarioError.AUTH_PASSWORD_EQUALS);
+        }
+        usuario.setPassword(passwordEncoder.encode(passwordNew));
+        usuario.setUltimaFechaCambioPassword(LocalDateTime.now());
+        usuario.setRequiereCambiarPassword(0);
+        usuario.setIntentosDeAcceso(0);
 
         return usuarioRepository.save(usuario);
     }
