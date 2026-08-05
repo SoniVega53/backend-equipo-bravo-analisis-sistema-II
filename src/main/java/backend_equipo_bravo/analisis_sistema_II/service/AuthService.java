@@ -9,6 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -29,7 +31,7 @@ public class AuthService {
     @Autowired
     private JwtService jwtService;
 
-    public String login(String idUsuario, String passwordPlano, String ip, String userAgent) {
+    public Map<String,Object> login(String idUsuario, String passwordPlano, String ip, String userAgent) {
 
         Optional<Usuario> userOpt = usuarioRepository.findByIdUsuario(idUsuario);
 
@@ -41,11 +43,10 @@ public class AuthService {
         Usuario usuario = userOpt.get();
 
         if (usuario.getIdStatusUsuario() != 1) {
-            auditoriaService.registrarIntento(idUsuario, 4, ip, userAgent, null);
-            throw new BusinessException(
-                    usuario.getIdStatusUsuario() == 2 ? UsuarioError.AUTH_USER_BLOCKED :
-                            UsuarioError.AUTH_USER_INACTIVE
-            );
+            boolean isInactive = usuario.getIdStatusUsuario() == 3;
+
+            auditoriaService.registrarIntento(idUsuario, isInactive ? 4 : 2, ip, userAgent, null);
+            throw new BusinessException(isInactive ? UsuarioError.AUTH_USER_INACTIVE : UsuarioError.AUTH_USER_BLOCKED);
         }
 
         if (!passwordEncoder.matches(passwordPlano, usuario.getPassword())) {
@@ -77,6 +78,11 @@ public class AuthService {
 
         auditoriaService.registrarIntento(idUsuario, 1, ip, userAgent, token);
 
-        return token;
+        Map<String,Object> data = new HashMap<>();
+        data.put("token",token);
+        int numChan = usuario.getRequiereCambiarPassword();
+        data.put("changePassword",numChan);
+
+        return data;
     }
 }

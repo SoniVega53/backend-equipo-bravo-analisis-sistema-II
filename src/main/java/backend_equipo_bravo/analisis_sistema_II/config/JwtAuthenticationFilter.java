@@ -12,9 +12,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -49,17 +52,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     boolean tokenCoincide = token.equals(usuario.getSesionActual());
                     boolean estaActivo = usuario.getIdStatusUsuario() == 1;
 
-                    if (tokenCoincide && estaActivo) {
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                usuario.getIdUsuario(), null, new ArrayList<>()
-                        );
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    if (!estaActivo) {
+                        boolean isInactivo = usuario.getIdStatusUsuario() == 3;
+
+                        enviarErrorPersonalizado(response, HttpServletResponse.SC_FORBIDDEN, 1501,
+                                isInactivo ? "USUARIO_INACTIVO" : "USUARIO_BLOQUEADO",
+                                isInactivo ? "Tu usuario está inactivo." : "Tu usuario está bloqueado.");
+                        return;
                     }
+
+                    if (!tokenCoincide) {
+                        enviarErrorPersonalizado(response, HttpServletResponse.SC_UNAUTHORIZED, 401,
+                                "SESION_INVALIDA", "Tu sesión ya no es válida o iniciaste sesión en otro dispositivo.");
+                        return;
+                    }
+
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            usuario.getIdUsuario(), null, new ArrayList<>()
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
         } catch (Exception e) {
+            enviarErrorPersonalizado(response, HttpServletResponse.SC_UNAUTHORIZED, 401,
+                    "TOKEN_INVALIDO", "El token ha expirado o es incorrecto.");
+            return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void enviarErrorPersonalizado(HttpServletResponse response, int httpStatus, int codigoNumerico, String codigoTexto, String mensaje) throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        response.setStatus(httpStatus);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("exito", false);
+        body.put("codigoNumerico", codigoNumerico);
+        body.put("codigoTexto", codigoTexto);
+        body.put("mensaje", mensaje);
+
+        ObjectMapper mapper = new ObjectMapper();
+        response.getWriter().write(mapper.writeValueAsString(body));
     }
 }

@@ -29,10 +29,9 @@ public class AuthController extends BaseController {
         String userAgent = httpRequest.getHeader("User-Agent");
 
         try {
-            String token = authService.login(request.getIdUsuario(), request.getPassword(), ip, userAgent);
+            Map<String,Object> inf = authService.login(request.getIdUsuario(), request.getPassword(), ip, userAgent);
 
-            Map<String, Object> tokenData = Map.of("token", token);
-            return success(tokenData, SuccessCode.AUTH_LOGIN_SUCCESS);
+            return success(inf, SuccessCode.AUTH_LOGIN_SUCCESS);
 
         } catch (BusinessException e) {
             return error(
