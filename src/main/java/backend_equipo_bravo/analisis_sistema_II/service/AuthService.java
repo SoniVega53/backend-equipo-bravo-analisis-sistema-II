@@ -9,6 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -29,7 +31,7 @@ public class AuthService {
     @Autowired
     private JwtService jwtService;
 
-    public String login(String idUsuario, String passwordPlano, String ip, String userAgent) {
+    public Map<String,Object> login(String idUsuario, String passwordPlano, String ip, String userAgent) {
 
         Optional<Usuario> userOpt = usuarioRepository.findByIdUsuario(idUsuario);
 
@@ -76,6 +78,11 @@ public class AuthService {
 
         auditoriaService.registrarIntento(idUsuario, 1, ip, userAgent, token);
 
-        return token;
+        Map<String,Object> data = new HashMap<>();
+        data.put("token",token);
+        int numChan = usuario.getRequiereCambiarPassword();
+        data.put("changePassword",numChan);
+
+        return data;
     }
 }

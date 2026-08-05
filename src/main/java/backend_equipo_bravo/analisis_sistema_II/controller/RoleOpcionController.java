@@ -22,12 +22,12 @@ public class RoleOpcionController  extends BaseController{
     public ResponseEntity<?> obtenerPermisosRol(@PathVariable String page) {
         try {
             RoleOptionDto role = RoleOptionDto.builder()
-                    .consultar(false)
-                    .alta(false)
-                    .baja(false)
-                    .cambio(false)
-                    .imprimir(false)
-                    .exportar(false)
+                    .consultar(true)
+                    .alta(true)
+                    .baja(true)
+                    .cambio(true)
+                    .imprimir(true)
+                    .exportar(true)
                     .build();
 
             Map<String, RoleOptionDto> data = new HashMap<>();
