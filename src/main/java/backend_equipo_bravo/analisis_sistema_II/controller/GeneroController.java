@@ -5,6 +5,7 @@ import backend_equipo_bravo.analisis_sistema_II.entity.Genero;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCode;
 import backend_equipo_bravo.analisis_sistema_II.service.GeneroService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/genero")
+@Tag(name = "Genero", description = "Endpoints para CRUD genero")
 public class GeneroController extends BaseController {
     @Autowired
     private GeneroService generoService;
