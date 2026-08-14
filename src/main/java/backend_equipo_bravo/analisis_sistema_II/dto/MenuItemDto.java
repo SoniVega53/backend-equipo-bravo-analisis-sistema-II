@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class MenuItemDto {
 
-    private Long id;
+    private String id;
 
     private String label;
 
