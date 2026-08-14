@@ -1,7 +1,9 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
+import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.GeneralError;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -33,7 +35,15 @@ public abstract class BaseService<T, ID> {
 
     public void eliminarBase(ID id) {
         T entidad = buscarPorId(id);
-        getRepository().delete(entidad);
+
+        try {
+            getRepository().delete(entidad);
+            getRepository().flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(GeneralError.ERROR_DEPENDENCY);
+        } catch (Exception e) {
+            throw new BusinessException(GeneralError.ERROR_SERVICE);
+        }
     }
 
     public String obtenerUsuarioAutenticado() {
