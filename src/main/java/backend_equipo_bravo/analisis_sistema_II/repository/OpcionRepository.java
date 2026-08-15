@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface OpcionRepository extends JpaRepository<Opcion, Integer> {
     Optional<Opcion> findByPagina(String pagina);
     List<Opcion> findByIdMenuIn(List<Integer> idsMenu);
+    List<Opcion> findByIdMenuInAndIdOpcionNot(List<Integer> idsMenu,Integer idOpcionExcluido);
+
 }

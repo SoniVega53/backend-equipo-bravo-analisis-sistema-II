@@ -125,13 +125,19 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
 
     public List<RoleOpcionListadoDto> obtenerMatrizPermisos(Integer idRole, Integer idModulo) {
         try {
+            String idUsuarioEjecutor = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            Usuario ejecutor = usuarioRepository.findByIdUsuario(idUsuarioEjecutor)
+                    .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
             List<Menu> menus = menuRepository.findByIdModulo(idModulo);
 
             List<Integer> idsMenu = menus.stream()
                     .map(Menu::getIdMenu)
                     .collect(Collectors.toList());
 
-            List<Opcion> opcionesDelModulo = opcionRepository.findByIdMenuIn(idsMenu);
+            List<Opcion> opcionesDelModulo = ejecutor.getIdRole() == 1 && idRole != 1 ? opcionRepository.findByIdMenuIn(idsMenu) :
+                    opcionRepository.findByIdMenuInAndIdOpcionNot(idsMenu,10);
 
             List<RoleOpcion> permisosExistentes = roleOpcionRepository.findByIdRole(idRole);
 
@@ -177,10 +183,18 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
     }
 
     public List<RoleDto> obtenerRoles(){
+        String idUsuarioEjecutor = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Usuario ejecutor = usuarioRepository.findByIdUsuario(idUsuarioEjecutor)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
         List<Role> roles = roleRepository.findAll();
         List<RoleDto> responseRoles = new ArrayList<>();
 
         roles.forEach(item -> {
+            if (item.getIdRole() == 1 && ejecutor.getIdRole() != 1){
+                return;
+            }
             responseRoles.add(
                     RoleDto.builder()
                             .idRole(item.getIdRole())
