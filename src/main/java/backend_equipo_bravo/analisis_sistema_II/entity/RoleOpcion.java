@@ -1,6 +1,6 @@
 package backend_equipo_bravo.analisis_sistema_II.entity;
 
-import backend_equipo_bravo.analisis_sistema_II.dto.RoleOpcionId;
+import backend_equipo_bravo.analisis_sistema_II.dto.RoleOption.RoleOpcionId;
 import jakarta.persistence.*;
 import lombok.Data;
 
