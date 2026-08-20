@@ -19,7 +19,6 @@ public class GeneroService extends BaseService<Genero, Integer> {
     @Autowired
     private GeneroRepository generoRepository;
 
-
     @Override
     protected JpaRepository<Genero, Integer> getRepository() {
         return generoRepository;
