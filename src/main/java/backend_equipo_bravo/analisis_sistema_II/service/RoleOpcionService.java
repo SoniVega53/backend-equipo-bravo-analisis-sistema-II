@@ -87,11 +87,18 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
             throw new BusinessException(UsuarioError.AUTH_NO_AUTHORIZED);
         }
 
+        Opcion opcion = opcionRepository.findByIdOpcion(10).orElse(new Opcion());
+        RoleOptionDto per = getAuthPageRole(opcion.getPagina());
+
         for (RoleOpcionItem item : request.getRoleOpcionItems()) {
             Optional<RoleOpcion> optData = roleOpcionRepository.findByIdRoleAndIdOpcion(item.getIdRole(), item.getIdOpcion());
 
             RoleOpcion data;
             if (optData.isPresent()) {
+                if (!per.getCambio()) {
+                    throw new BusinessException(UsuarioError.AUTH_NO_AUTHORIZED_MODIFY);
+                }
+
                 data = optData.get();
                 data.setAlta(item.getAlta());
                 data.setBaja(item.getBaja());
@@ -105,6 +112,9 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
 
                 super.actualizarBase(data);
             } else {
+                if (!per.getAlta()) {
+                    throw new BusinessException(UsuarioError.AUTH_NO_AUTHORIZED_ADD);
+                }
                 data = new RoleOpcion();
                 data.setIdRole(item.getIdRole());
                 data.setIdOpcion(item.getIdOpcion());
@@ -117,8 +127,8 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
 
                 data.setUsuarioCreacion(usuarioActual);
                 data.setFechaCreacion(LocalDateTime.now());
-
-                roleOpcionRepository.save(data);
+                super.crearBase(data);
+//                roleOpcionRepository.save(data);
             }
         }
     }
@@ -136,8 +146,10 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
                     .map(Menu::getIdMenu)
                     .collect(Collectors.toList());
 
-            List<Opcion> opcionesDelModulo = ejecutor.getIdRole() == 1 && idRole != 1 ? opcionRepository.findByIdMenuIn(idsMenu) :
-                    opcionRepository.findByIdMenuInAndIdOpcionNot(idsMenu,10);
+//            List<Opcion> opcionesDelModulo = ejecutor.getIdRole() == 1 && idRole != 1 ? opcionRepository.findByIdMenuIn(idsMenu) :
+//                    opcionRepository.findByIdMenuInAndIdOpcionNot(idsMenu,10);
+
+            List<Opcion> opcionesDelModulo = opcionRepository.findByIdMenuInAndIdOpcionNot(idsMenu,10);
 
             List<RoleOpcion> permisosExistentes = roleOpcionRepository.findByIdRole(idRole);
 
