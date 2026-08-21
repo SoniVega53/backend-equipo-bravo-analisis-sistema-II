@@ -1,5 +1,6 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
+import backend_equipo_bravo.analisis_sistema_II.dto.ControlIdOpcion;
 import backend_equipo_bravo.analisis_sistema_II.dto.ModuloDto;
 import backend_equipo_bravo.analisis_sistema_II.dto.RoleDto;
 import backend_equipo_bravo.analisis_sistema_II.dto.RoleOption.*;
@@ -87,7 +88,7 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
             throw new BusinessException(UsuarioError.AUTH_NO_AUTHORIZED);
         }
 
-        Opcion opcion = opcionRepository.findByIdOpcion(10).orElse(new Opcion());
+        Opcion opcion = opcionRepository.findByIdOpcion(ControlIdOpcion.ASIG_OPCIONES.getId()).orElse(new Opcion());
         RoleOptionDto per = getAuthPageRole(opcion.getPagina());
 
         for (RoleOpcionItem item : request.getRoleOpcionItems()) {
@@ -149,7 +150,7 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
 //            List<Opcion> opcionesDelModulo = ejecutor.getIdRole() == 1 && idRole != 1 ? opcionRepository.findByIdMenuIn(idsMenu) :
 //                    opcionRepository.findByIdMenuInAndIdOpcionNot(idsMenu,10);
 
-            List<Opcion> opcionesDelModulo = opcionRepository.findByIdMenuInAndIdOpcionNot(idsMenu,10);
+            List<Opcion> opcionesDelModulo = opcionRepository.findByIdMenuInAndIdOpcionNot(idsMenu,ControlIdOpcion.ASIG_OPCIONES.getId());
 
             List<RoleOpcion> permisosExistentes = roleOpcionRepository.findByIdRole(idRole);
 
