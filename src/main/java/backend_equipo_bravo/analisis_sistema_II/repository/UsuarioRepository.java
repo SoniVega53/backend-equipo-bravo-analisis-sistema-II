@@ -11,7 +11,6 @@ import java.util.Optional;
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, String> {
     Optional<Usuario> findByIdUsuario(String idUsuario);
-
     @Query("""
                 SELECT u.idSucursal
                 FROM Usuario u

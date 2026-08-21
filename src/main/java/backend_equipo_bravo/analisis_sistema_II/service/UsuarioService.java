@@ -19,13 +19,14 @@ import backend_equipo_bravo.analisis_sistema_II.repository.SucursalRepository;
 import backend_equipo_bravo.analisis_sistema_II.repository.UsuarioRepository;
 import backend_equipo_bravo.analisis_sistema_II.utils.FechaUtil;
 import backend_equipo_bravo.analisis_sistema_II.utils.FormatoFecha;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 public class UsuarioService {
@@ -219,6 +220,76 @@ public class UsuarioService {
         usuario.setUltimaFechaCambioPassword(LocalDateTime.now());
         usuario.setRequiereCambiarPassword(0);
         usuario.setIntentosDeAcceso(0);
+
+        return usuarioRepository.save(usuario);
+    }
+
+    public String getPreguntaUsuario(String idUsuarioLog,String ip, String userAgent) {
+
+        Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLog)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        if (usuario.getIdStatusUsuario() != 1) {
+            boolean isInactive = usuario.getIdStatusUsuario() == 3;
+
+            auditoriaService.registrarIntento(idUsuarioLog, isInactive ? 4 : 2, ip, userAgent, null);
+            throw new BusinessException(isInactive ? UsuarioError.AUTH_USER_INACTIVE : UsuarioError.AUTH_USER_BLOCKED);
+        }
+
+        return usuario.getPregunta();
+    }
+
+    public boolean validarRespuestaUsuario(String idUsuarioLog, String respuesta,String ip, String userAgent) {
+        Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLog)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        if (usuario.getIdStatusUsuario() != 1) {
+            boolean isInactive = usuario.getIdStatusUsuario() == 3;
+
+            auditoriaService.registrarIntento(idUsuarioLog, isInactive ? 4 : 2, ip, userAgent, null);
+            throw new BusinessException(isInactive ? UsuarioError.AUTH_USER_INACTIVE : UsuarioError.AUTH_USER_BLOCKED);
+        }
+
+        if (!usuario.getRespuesta().equals(respuesta)) {
+
+            int intentosActuales = usuario.getIntentosDeAcceso() != null ? usuario.getIntentosDeAcceso() : 0;
+            intentosActuales++;
+            usuario.setIntentosDeAcceso(intentosActuales);
+
+            int intentosPermitidos = politicasService.obtenerIntentosPermitidosPorSucursal(usuario.getIdSucursal());
+
+            if (intentosActuales >= intentosPermitidos) {
+                usuario.setIdStatusUsuario(2);
+                usuario.setSesionActual(null);
+                usuarioRepository.save(usuario);
+                auditoriaService.registrarIntento(idUsuarioLog, 3, ip, userAgent, null);
+                throw new BusinessException(UsuarioError.AUTH_USER_BLOCKED_ATTEMPTS);
+            } else {
+                usuarioRepository.save(usuario);
+                auditoriaService.registrarIntento(idUsuarioLog, 2, ip, userAgent, null);
+                throw new BusinessException(UsuarioError.AUTH_INVALID_ANSWER, intentosActuales, intentosPermitidos);
+            }
+        }
+
+        usuario.setIntentosDeAcceso(0);
+        usuarioRepository.save(usuario);
+
+        return true;
+    }
+
+    public Usuario cambioPasswordRecuperacion(String idUsuarioLog,String password) {
+        Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLog)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        if (password == null || password.isEmpty()) {
+            throw new BusinessException(UsuarioError.AUTH_PASSWORD_EMPTY);
+        }
+
+        usuario.setPassword(passwordEncoder.encode(password));
+        usuario.setUltimaFechaCambioPassword(LocalDateTime.now());
+        usuario.setRequiereCambiarPassword(0);
+        usuario.setFechaModificacion(LocalDateTime.now());
+        usuario.setUsuarioModificacion(usuario.getIdUsuario());
 
         return usuarioRepository.save(usuario);
     }

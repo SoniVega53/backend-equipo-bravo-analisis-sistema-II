@@ -15,6 +15,8 @@ public enum UsuarioError {
     AUTH_NO_AUTHORIZED_ADD(401, "AUTH_NO_AUTHORIZED_ADD", "No tiene Permisos para crear el registro.", "Permisos Insuficientes."),
     AUTH_INVALID_CREDENTIALS_ATTEMPTS(109, "AUTH_INVALID_CREDENTIALS_ATTEMPTS", "Credenciales inválidas. Intento %d de %d.", "El usuario introdujo una contraseña incorrecta y se incrementó el contador de intentos."),
     AUTH_NOT_CHANGE(1400, "AUTH_NOT_CHANGE", "Usuario No Necesita Cambiar Contraseña", ""),
+    AUTH_INVALID_ANSWER(400, "AUTH_INVALID_ANSWER", "Respuesta incorrecta, Intento %d de %d.", "La respuesta proporcionada no coincide con nuestros registros."),
+    AUTH_NO_QUESTION_CONFIGURED(400, "AUTH_NO_QUESTION", "Pregunta no configurada", "El usuario no tiene una pregunta de seguridad configurada."),
     AUTH_PASSWORD_EMPTY(140, "AUTH_PASSWORD_EMPTY", "Contraseña Vacia", ""),
     AUTH_PASSWORD_NOAUTH(143, "AUTH_PASSWORD_NOAUTH", "Contraseña actual no valida", "Contraseña es incorrecta"),
     AUTH_PASSWORD_EQUALS(1401, "AUTH_PASSWORD_EQUALS", "Contraseña es igual a la anterior", "La nueva contraseña no puede ser igual a la anterior");

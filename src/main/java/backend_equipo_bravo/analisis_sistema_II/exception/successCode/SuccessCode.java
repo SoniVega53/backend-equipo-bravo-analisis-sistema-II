@@ -2,6 +2,7 @@ package backend_equipo_bravo.analisis_sistema_II.exception.successCode;
 
 public enum SuccessCode {
 
+    GENERAL(200, "GENERAL", "Acción exitosa."),
     AUTH_LOGIN_SUCCESS(200, "AUTH_LOGIN_SUCCESS", "Autenticación exitosa."),
     AUTH_PERFIL_SUCCESS(200, "AUTH_PERFIL_SUCCESS", "Informacion exitosa."),
     USER_CREATED_SUCCESS(201, "USER_CREATED_SUCCESS", "El usuario se creó correctamente."),

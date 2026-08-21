@@ -39,11 +39,7 @@ public class PoliticasSeguridadService {
                 : 3;
     }
 
-
-    public PasswordPolicyDto obtenerPoliticaPassword() {
-        String idUsuarioLog = SecurityContextHolder.getContext().getAuthentication().getName();
-
-
+    public PasswordPolicyDto obtenerPoliticaPasswordBase(String idUsuarioLog) {
         Integer idSucursal = usuarioRepository
                 .findIdSucursalByIdUsuario(idUsuarioLog)
                 .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
@@ -93,6 +89,13 @@ public class PoliticasSeguridadService {
                 .mensajeValidacion(mensajeFinal)
                 .largoMinimo(largoMinimo)
                 .build();
+    }
+
+
+    public PasswordPolicyDto obtenerPoliticaPassword() {
+        String idUsuarioLog = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return obtenerPoliticaPasswordBase(idUsuarioLog);
     }
 
     private int nvl(Integer valor) {
