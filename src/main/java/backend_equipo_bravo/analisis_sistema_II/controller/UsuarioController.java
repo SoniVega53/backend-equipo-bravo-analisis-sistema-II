@@ -1,10 +1,7 @@
 package backend_equipo_bravo.analisis_sistema_II.controller;
 
 import backend_equipo_bravo.analisis_sistema_II.dto.PasswordPolicyDto;
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioPasswordChangeRequest;
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioPerfilRequest;
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdatePasswordRequest;
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdateRequest;
+import backend_equipo_bravo.analisis_sistema_II.dto.usuario.*;
 import backend_equipo_bravo.analisis_sistema_II.entity.Usuario;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError;
@@ -136,5 +133,26 @@ public class UsuarioController extends BaseController{
                     HttpStatus.UNAUTHORIZED
             );
         }
+    }
+
+    @PostMapping("/console/guardar")
+    public ResponseEntity<?> consoleUpdateAndSaveUsuario(@RequestBody UsuarioSaveRequest request) {
+        try {
+            Usuario usuario = usuarioService.consoleUpdateAndSaveUsuario(request);
+            return success(usuario, SuccessCode.GENERAL);
+        } catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/console/listar")
+    public ResponseEntity<?> listarTodos() {
+        return success(usuarioService.buscarTodos(), SuccessCode.GENERO_GENERAL);
+    }
+
+    @DeleteMapping("/console/eliminar/{idUsuario}")
+    public ResponseEntity<?> eliminar(@PathVariable String idUsuario) {
+        usuarioService.eliminarUsuario(idUsuario);
+        return success("Se elimino correctamente", SuccessCode.GENERO_GENERAL);
     }
 }
