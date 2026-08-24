@@ -68,12 +68,16 @@ public class UsuarioController extends BaseController{
     public ResponseEntity<Map<String, Object>> getChangePassword() {
         try {
             PasswordPolicyDto policyDto = empresaService.obtenerPoliticaPassword();
-            Boolean changePassword = usuarioService.getChangePassword();
+            int changePassword = usuarioService.getChangePassword();
 
             Map<String, Object> data = new HashMap<>();
             data.put("changePassword", changePassword);
-            if (changePassword) {
+            if (changePassword > 0) {
                 data.put("policy",policyDto);
+                data.put("textoIngresoPassword", changePassword == 1 ?
+                        "Por favor, configure su nueva contraseña." :
+                        "Tu contraseña ha vencido. Por favor, ingresa una nueva para continuar."
+                        );
             }
             return success(data, SuccessCode.AUTH_LOGIN_SUCCESS);
         } catch (BusinessException e) {
