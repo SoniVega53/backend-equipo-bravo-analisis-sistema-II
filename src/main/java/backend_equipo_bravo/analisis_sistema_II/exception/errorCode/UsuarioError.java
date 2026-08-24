@@ -12,10 +12,12 @@ public enum UsuarioError {
     AUTH_TOKEN_EXPIRED(105, "AUTH_TOKEN_EXPIRED", "La sesión ha expirado. Por favor, ingrese de nuevo.", "El JWT enviado ya pasó su tiempo de vida configurado."),
     AUTH_UNAUTHORIZED(106, "AUTH_UNAUTHORIZED", "Acceso denegado: No tiene permisos suficientes.", "El usuario intenta realizar una acción o entrar a un módulo para el que no tiene rol."),
     AUTH_NO_AUTHORIZED(107, "AUTH_NO_AUTHORIZED", "Usuario no logeado correctamente.", "No existe usuario."),
-    AUTH_NO_AUTHORIZED_MODIFY(401, "AUTH_NO_AUTHORIZED_MODIFY", "No tiene Permisos para modificar el registro.", "Permisos Insuficientes."),
-    AUTH_NO_AUTHORIZED_VIEW(401, "AUTH_NO_AUTHORIZED_VIEW", "No tiene Permisos para ver los registros.", "Permisos Insuficientes."),
-    AUTH_NO_AUTHORIZED_DELETE(401, "AUTH_NO_AUTHORIZED_DELETE", "No tiene Permisos para elminar el registro.", "Permisos Insuficientes."),
-    AUTH_NO_AUTHORIZED_ADD(401, "AUTH_NO_AUTHORIZED_ADD", "No tiene Permisos para crear el registro.", "Permisos Insuficientes."),
+
+    AUTH_NO_AUTHORIZED_VIEW(4001, "AUTH_NO_AUTHORIZED_VIEW", "No tiene Permisos para ver los registros.", "Permisos Insuficientes."),
+    AUTH_NO_AUTHORIZED_MODIFY(4002, "AUTH_NO_AUTHORIZED_MODIFY", "No tiene Permisos para modificar el registro.", "Permisos Insuficientes."),
+    AUTH_NO_AUTHORIZED_DELETE(4003, "AUTH_NO_AUTHORIZED_DELETE", "No tiene Permisos para eliminar el registro.", "Permisos Insuficientes."),
+    AUTH_NO_AUTHORIZED_ADD(4004, "AUTH_NO_AUTHORIZED_ADD", "No tiene Permisos para crear el registro.", "Permisos Insuficientes."),
+
     AUTH_INVALID_CREDENTIALS_ATTEMPTS(109, "AUTH_INVALID_CREDENTIALS_ATTEMPTS", "Credenciales inválidas. Intento %d de %d.", "El usuario introdujo una contraseña incorrecta y se incrementó el contador de intentos."),
     AUTH_NOT_CHANGE(1400, "AUTH_NOT_CHANGE", "Usuario No Necesita Cambiar Contraseña", ""),
     AUTH_INVALID_ANSWER(400, "AUTH_INVALID_ANSWER", "Respuesta incorrecta, Intento %d de %d.", "La respuesta proporcionada no coincide con nuestros registros."),

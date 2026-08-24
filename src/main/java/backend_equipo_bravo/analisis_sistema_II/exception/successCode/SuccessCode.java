@@ -19,6 +19,15 @@ public enum SuccessCode {
     GENERO_UPDATED_SUCCESS(200, "GENERAL_SUCCESS", "Genero actualizado Correctamente."),
     GENERO_DELETED_SUCCESS(200, "GENERAL_SUCCESS", "Genero eliminado Correctamente."),
 
+    EMPRESA_SUCCESS(200, "EMPRESA_SUCCESS", "Empresa creada correctamente."),
+    EMPRESA_GENERAL(200, "EMPRESA_GENERAL", "Consulta exitosa."),
+    EMPRESA_UPDATED_SUCCESS(200, "EMPRESA_UPDATED_SUCCESS", "Empresa actualizada correctamente."),
+    EMPRESA_DELETED_SUCCESS(200, "EMPRESA_DELETED_SUCCESS", "Empresa eliminada correctamente."),
+
+    SUCURSAL_SUCCESS(200, "SUCURSAL_SUCCESS", "Sucursal creada correctamente."),
+    SUCURSAL_GENERAL(200, "SUCURSAL_GENERAL", "Consulta exitosa."),
+    SUCURSAL_UPDATED_SUCCESS(200, "SUCURSAL_UPDATED_SUCCESS", "Sucursal actualizada correctamente."),
+
     TIPO_ACCESO_SUCCESS(200, "TIPO_ACCESO_SUCCESS", "Tipo de acceso creado Correctamente."),
     TIPO_ACCESO_GENERAL(200, "TIPO_ACCESO_GENERAL", "Consulta Exitosa."),
     TIPO_ACCESO_UPDATED_SUCCESS(200, "TIPO_ACCESO_UPDATED_SUCCESS", "Tipo de acceso actualizado Correctamente."),
