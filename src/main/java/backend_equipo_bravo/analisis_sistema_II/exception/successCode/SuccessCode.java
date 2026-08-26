@@ -28,6 +28,11 @@ public enum SuccessCode {
     SUCURSAL_GENERAL(200, "SUCURSAL_GENERAL", "Consulta exitosa."),
     SUCURSAL_UPDATED_SUCCESS(200, "SUCURSAL_UPDATED_SUCCESS", "Sucursal actualizada correctamente."),
 
+    STATUS_USUARIO_SUCCESS(200, "STATUS_USUARIO_SUCCESS", "Estatus de usuario creado correctamente."),
+    STATUS_USUARIO_GENERAL(200, "STATUS_USUARIO_GENERAL", "Consulta exitosa."),
+    STATUS_USUARIO_UPDATED_SUCCESS(200, "STATUS_USUARIO_UPDATED_SUCCESS", "Estatus de usuario actualizado correctamente."),
+    STATUS_USUARIO_DELETED_SUCCESS(200, "STATUS_USUARIO_DELETED_SUCCESS", "Estatus de usuario eliminado correctamente."),
+
     TIPO_ACCESO_SUCCESS(200, "TIPO_ACCESO_SUCCESS", "Tipo de acceso creado Correctamente."),
     TIPO_ACCESO_GENERAL(200, "TIPO_ACCESO_GENERAL", "Consulta Exitosa."),
     TIPO_ACCESO_UPDATED_SUCCESS(200, "TIPO_ACCESO_UPDATED_SUCCESS", "Tipo de acceso actualizado Correctamente."),
