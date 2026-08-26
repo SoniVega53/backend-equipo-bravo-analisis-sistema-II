@@ -17,6 +17,9 @@ public class OpcionService extends BaseService<Opcion, Integer> {
     @Autowired
     private OpcionRepository opcionRepository;
 
+    @Autowired
+    private RoleOpcionService roleOpcionService;
+
     @Override
     protected JpaRepository<Opcion, Integer> getRepository() {
         return opcionRepository;
@@ -36,7 +39,11 @@ public class OpcionService extends BaseService<Opcion, Integer> {
         opcion.setUsuarioCreacion(usuarioActual);
         opcion.setFechaCreacion(LocalDateTime.now());
 
-        return super.crearBasePermisos(opcion);
+        Opcion entity = super.crearBasePermisos(opcion);
+
+        roleOpcionService.createOpcionPermit(entity.getIdOpcion(),usuarioActual);
+
+        return entity;
     }
 
     public Opcion actualizar(Integer id, OpcionRequest request) {

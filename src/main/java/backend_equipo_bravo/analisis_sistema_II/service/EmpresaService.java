@@ -62,7 +62,7 @@ public class EmpresaService extends BaseService<Empresa, Integer> {
         empresa.setPasswordLargo(request.getPasswordLargo());
         empresa.setPasswordIntentosAntesDeBloquear(request.getPasswordIntentosAntesDeBloquear());
         empresa.setPasswordCantidadNumeros(request.getPasswordCantidadNumeros());
-        //empresa.setPasswordCantidadPreguntasValidar(request.getPasswordCantidadPreguntasValidar());
-        empresa.setPasswordCantidadPreguntasValidar(1);
+        empresa.setPasswordCantidadPreguntasValidar(request.getPasswordCantidadPreguntasValidar());
+        //empresa.setPasswordCantidadPreguntasValidar(1);
     }
 }

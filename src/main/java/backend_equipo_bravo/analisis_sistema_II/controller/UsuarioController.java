@@ -151,12 +151,20 @@ public class UsuarioController extends BaseController{
 
     @GetMapping("/console/listar")
     public ResponseEntity<?> listarTodos() {
-        return success(usuarioService.buscarTodos(), SuccessCode.GENERO_GENERAL);
+        try {
+            return success(usuarioService.buscarTodos(), SuccessCode.GENERO_GENERAL);
+        } catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @DeleteMapping("/console/eliminar/{idUsuario}")
     public ResponseEntity<?> eliminar(@PathVariable String idUsuario) {
-        usuarioService.eliminarUsuario(idUsuario);
-        return success("Se elimino correctamente", SuccessCode.GENERO_GENERAL);
+        try {
+            usuarioService.eliminarUsuario(idUsuario);
+            return success("Se elimino correctamente", SuccessCode.GENERO_GENERAL);
+        } catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 }
