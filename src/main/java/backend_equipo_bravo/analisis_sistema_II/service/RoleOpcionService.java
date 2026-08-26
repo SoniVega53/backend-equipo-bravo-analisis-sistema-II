@@ -1,5 +1,6 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
+import backend_equipo_bravo.analisis_sistema_II.dto.ControlIdOpcion;
 import backend_equipo_bravo.analisis_sistema_II.dto.ModuloDto;
 import backend_equipo_bravo.analisis_sistema_II.dto.RoleDto;
 import backend_equipo_bravo.analisis_sistema_II.dto.RoleOption.*;
@@ -51,14 +52,14 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
         return new BusinessException(GeneralError.ERROR_SERVICE);
     }
 
-    public RoleOptionDto getAuthPageRole(String pagina) {
+    public RoleOptionDto getAuthPageRole(Integer pagina) {
         try {
             String idUsuarioLogg = SecurityContextHolder.getContext().getAuthentication().getName();
 
             Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLogg)
                     .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
 
-            Opcion opcion = opcionRepository.findByPagina(pagina).orElse(new Opcion());
+            Opcion opcion = opcionRepository.findByIdOpcion(pagina).orElse(new Opcion());
 
 
             RoleOpcion permisoRol = roleOpcionRepository.findByIdRoleAndIdOpcion(usuario.getIdRole(), opcion.getIdOpcion())
@@ -87,8 +88,8 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
             throw new BusinessException(UsuarioError.AUTH_NO_AUTHORIZED);
         }
 
-        Opcion opcion = opcionRepository.findByIdOpcion(10).orElse(new Opcion());
-        RoleOptionDto per = getAuthPageRole(opcion.getPagina());
+        Opcion opcion = opcionRepository.findByIdOpcion(ControlIdOpcion.ASIG_OPCIONES.getId()).orElse(new Opcion());
+        RoleOptionDto per = getAuthPageRole(opcion.getIdOpcion());
 
         for (RoleOpcionItem item : request.getRoleOpcionItems()) {
             Optional<RoleOpcion> optData = roleOpcionRepository.findByIdRoleAndIdOpcion(item.getIdRole(), item.getIdOpcion());
@@ -149,7 +150,7 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
 //            List<Opcion> opcionesDelModulo = ejecutor.getIdRole() == 1 && idRole != 1 ? opcionRepository.findByIdMenuIn(idsMenu) :
 //                    opcionRepository.findByIdMenuInAndIdOpcionNot(idsMenu,10);
 
-            List<Opcion> opcionesDelModulo = opcionRepository.findByIdMenuInAndIdOpcionNot(idsMenu,10);
+            List<Opcion> opcionesDelModulo = opcionRepository.findByIdMenuInAndIdOpcionNot(idsMenu,ControlIdOpcion.ASIG_OPCIONES.getId());
 
             List<RoleOpcion> permisosExistentes = roleOpcionRepository.findByIdRole(idRole);
 
