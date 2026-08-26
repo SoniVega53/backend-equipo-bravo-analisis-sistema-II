@@ -227,13 +227,40 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    public boolean getChangePassword() {
+    public int getChangePassword() {
         String idUsuarioLog = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLog)
                 .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
 
-        return usuario.getRequiereCambiarPassword() == 1;
+        boolean isReno = validarRenovacionPassword(usuario);
+
+        if ((usuario.getUltimaFechaCambioPassword() == null ||
+                (usuario.getRequiereCambiarPassword() == null || usuario.getRequiereCambiarPassword() == 1)) ||
+                isReno) {
+            usuario.setRequiereCambiarPassword(isReno ? 2:1);
+        }else{
+            usuario.setRequiereCambiarPassword(0);
+        }
+
+        usuarioRepository.save(usuario);
+
+        return usuario.getRequiereCambiarPassword() != null ? usuario.getRequiereCambiarPassword() : 1;
+    }
+
+    private boolean validarRenovacionPassword(Usuario usuario){
+        Empresa empresa = politicasService.obtenerEmpresaPorSucursal(usuario.getIdSucursal());
+        Integer diasCaducidad = empresa.getPasswordCantidadCaducidadDias();
+
+        if (diasCaducidad != null && diasCaducidad > 0 && usuario.getUltimaFechaCambioPassword() != null) {
+            long diasTranscurridos = java.time.temporal.ChronoUnit.DAYS.between(
+                    usuario.getUltimaFechaCambioPassword(),
+                    LocalDateTime.now()
+            );
+            return diasTranscurridos >= diasCaducidad;
+        }
+
+        return false;
     }
 
     public UsuarioPerfilResponse getDataPerfil() {

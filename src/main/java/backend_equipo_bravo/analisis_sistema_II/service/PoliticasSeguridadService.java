@@ -39,6 +39,16 @@ public class PoliticasSeguridadService {
                 : 3;
     }
 
+    public Empresa obtenerEmpresaPorSucursal(Integer idSucursal) {
+        Sucursal sucursal = sucursalRepository.findById(idSucursal)
+                .orElseThrow(() -> new BusinessException(SucursalError.SUCURSAL_NOT_FOUND));
+
+        Empresa empresa = empresaRepository.findById(sucursal.getIdEmpresa())
+                .orElseThrow(() -> new BusinessException(EmpresaError.EMPRESA_NOT_FOUND));
+
+        return empresa;
+    }
+
 
     public PasswordPolicyDto obtenerPoliticaPasswordEmpresa(Integer idEmpresa){
         Empresa empresa = empresaRepository.findById(idEmpresa)
