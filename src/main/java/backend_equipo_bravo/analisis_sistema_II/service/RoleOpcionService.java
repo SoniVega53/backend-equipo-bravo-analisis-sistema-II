@@ -52,14 +52,14 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
         return new BusinessException(GeneralError.ERROR_SERVICE);
     }
 
-    public RoleOptionDto getAuthPageRole(String pagina) {
+    public RoleOptionDto getAuthPageRole(Integer pagina) {
         try {
             String idUsuarioLogg = SecurityContextHolder.getContext().getAuthentication().getName();
 
             Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLogg)
                     .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
 
-            Opcion opcion = opcionRepository.findByPagina(pagina).orElse(new Opcion());
+            Opcion opcion = opcionRepository.findByIdOpcion(pagina).orElse(new Opcion());
 
 
             RoleOpcion permisoRol = roleOpcionRepository.findByIdRoleAndIdOpcion(usuario.getIdRole(), opcion.getIdOpcion())
@@ -89,7 +89,7 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
         }
 
         Opcion opcion = opcionRepository.findByIdOpcion(ControlIdOpcion.ASIG_OPCIONES.getId()).orElse(new Opcion());
-        RoleOptionDto per = getAuthPageRole(opcion.getPagina());
+        RoleOptionDto per = getAuthPageRole(opcion.getIdOpcion());
 
         for (RoleOpcionItem item : request.getRoleOpcionItems()) {
             Optional<RoleOpcion> optData = roleOpcionRepository.findByIdRoleAndIdOpcion(item.getIdRole(), item.getIdOpcion());
