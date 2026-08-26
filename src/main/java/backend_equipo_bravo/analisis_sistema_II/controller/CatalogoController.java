@@ -43,4 +43,14 @@ public class CatalogoController extends BaseController {
     public ResponseEntity<?> getRoles() {
         return success(catalogoService.getRoles(), SuccessCode.GENERAL);
     }
+
+    @GetMapping("/modulos")
+    public ResponseEntity<?> getModulos() {
+        return success(catalogoService.getModulos(), SuccessCode.GENERAL);
+    }
+
+    @GetMapping("/menus")
+    public ResponseEntity<?> getMenus() {
+        return success(catalogoService.getMenus(), SuccessCode.GENERAL);
+    }
 }

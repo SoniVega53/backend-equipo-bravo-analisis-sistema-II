@@ -33,6 +33,25 @@ public enum SuccessCode {
     STATUS_USUARIO_UPDATED_SUCCESS(200, "STATUS_USUARIO_UPDATED_SUCCESS", "Estatus de usuario actualizado correctamente."),
     STATUS_USUARIO_DELETED_SUCCESS(200, "STATUS_USUARIO_DELETED_SUCCESS", "Estatus de usuario eliminado correctamente."),
 
+    ROLE_GENERAL(200, "ROLE_GENERAL", "Operación de rol realizada con éxito."),
+    ROLE_SUCCESS(201, "ROLE_SUCCESS", "Rol creado exitosamente."),
+    ROLE_UPDATED_SUCCESS(200, "ROLE_UPDATED_SUCCESS", "Rol actualizado exitosamente."),
+    ROLE_DELETED_SUCCESS(200, "ROLE_DELETED_SUCCESS", "Rol eliminado exitosamente."),
+
+    MODULO_GENERAL(200, "MODULO_GENERAL", "Operación de módulo realizada con éxito."),
+    MODULO_SUCCESS(201, "MODULO_SUCCESS", "Módulo creado exitosamente."),
+    MODULO_UPDATED_SUCCESS(200, "MODULO_UPDATED_SUCCESS", "Módulo actualizado exitosamente."),
+    MODULO_DELETED_SUCCESS(200, "MODULO_DELETED_SUCCESS", "Módulo eliminado exitosamente."),
+
+    MENU_SUCCESS(201, "MENU_SUCCESS", "Menú creado exitosamente."),
+    MENU_UPDATED_SUCCESS(200, "MENU_UPDATED_SUCCESS", "Menú actualizado exitosamente."),
+    MENU_DELETED_SUCCESS(200, "MENU_DELETED_SUCCESS", "Menú eliminado exitosamente."),
+
+    OPCION_GENERAL(200, "OPCION_GENERAL", "Operación de opción realizada con éxito."),
+    OPCION_SUCCESS(201, "OPCION_SUCCESS", "Opción creada exitosamente."),
+    OPCION_UPDATED_SUCCESS(200, "OPCION_UPDATED_SUCCESS", "Opción actualizada exitosamente."),
+    OPCION_DELETED_SUCCESS(200, "OPCION_DELETED_SUCCESS", "Opción eliminada exitosamente."),
+
     TIPO_ACCESO_SUCCESS(200, "TIPO_ACCESO_SUCCESS", "Tipo de acceso creado Correctamente."),
     TIPO_ACCESO_GENERAL(200, "TIPO_ACCESO_GENERAL", "Consulta Exitosa."),
     TIPO_ACCESO_UPDATED_SUCCESS(200, "TIPO_ACCESO_UPDATED_SUCCESS", "Tipo de acceso actualizado Correctamente."),
