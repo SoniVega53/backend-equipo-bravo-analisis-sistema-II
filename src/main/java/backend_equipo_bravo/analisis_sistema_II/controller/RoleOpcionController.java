@@ -23,11 +23,11 @@ public class RoleOpcionController  extends BaseController{
     @Autowired
     private RoleOpcionService roleOpcionService;
 
-    @GetMapping("/{page}")
-    public ResponseEntity<?> obtenerPermisosRol(@PathVariable String page) {
+    @GetMapping("/{code}")
+    public ResponseEntity<?> obtenerPermisosRol(@PathVariable Integer code) {
         try {
             Map<String, RoleOptionDto> data = new HashMap<>();
-            data.put("permisos",roleOpcionService.getAuthPageRole(page));
+            data.put("permisos",roleOpcionService.getAuthPageRole(code));
             return success(data, SuccessCode.USER_AUTH_SUCCESS);
         } catch (BusinessException e) {
             return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
