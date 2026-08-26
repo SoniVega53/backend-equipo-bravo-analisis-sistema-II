@@ -101,6 +101,12 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
                     throw new BusinessException(UsuarioError.AUTH_NO_AUTHORIZED_MODIFY);
                 }
 
+                if (item.getAlta() == 0 && item.getBaja() == 0 && item.getCambio() == 0 &&
+                        item.getConsultar() == 0 && item.getExportar() == 0 && item.getImprimir() == 0) {
+                    roleOpcionRepository.delete(optData.get());
+                    return;
+                }
+
                 data = optData.get();
                 data.setAlta(item.getAlta());
                 data.setBaja(item.getBaja());
