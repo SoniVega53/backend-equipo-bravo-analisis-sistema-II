@@ -50,18 +50,8 @@ public class PoliticasSeguridadService {
     }
 
 
-    public PasswordPolicyDto obtenerPoliticaPassword() {
-        String idUsuarioLog = SecurityContextHolder.getContext().getAuthentication().getName();
-
-
-        Integer idSucursal = usuarioRepository
-                .findIdSucursalByIdUsuario(idUsuarioLog)
-                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
-
-        Sucursal sucursal = sucursalRepository.findById(idSucursal)
-                .orElseThrow(() -> new BusinessException(SucursalError.SUCURSAL_NOT_FOUND));
-
-        Empresa empresa = empresaRepository.findById(sucursal.getIdEmpresa())
+    public PasswordPolicyDto obtenerPoliticaPasswordEmpresa(Integer idEmpresa){
+        Empresa empresa = empresaRepository.findById(idEmpresa)
                 .orElseThrow(() -> new BusinessException(EmpresaError.EMPRESA_NOT_FOUND));
 
         StringBuilder regex = new StringBuilder("^");
@@ -105,11 +95,53 @@ public class PoliticasSeguridadService {
                 .build();
     }
 
+    public PasswordPolicyDto obtenerPoliticaPasswordBase(String idUsuarioLog) {
+        Integer idSucursal = usuarioRepository
+                .findIdSucursalByIdUsuario(idUsuarioLog)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        Sucursal sucursal = sucursalRepository.findById(idSucursal)
+                .orElseThrow(() -> new BusinessException(SucursalError.SUCURSAL_NOT_FOUND));
+
+        return obtenerPoliticaPasswordEmpresa(sucursal.getIdEmpresa());
+    }
+
+
+    public PasswordPolicyDto obtenerPoliticaPassword() {
+        String idUsuarioLog = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return obtenerPoliticaPasswordBase(idUsuarioLog);
+    }
+
     private int nvl(Integer valor) {
         return valor != null ? valor : 0;
     }
 
     private int nvl(Integer valor, int valorPorDefecto) {
         return valor != null ? valor : valorPorDefecto;
+    }
+
+    public boolean esPasswordValido(Integer idEmpresa, String password) {
+        if (password == null || password.trim().isEmpty()) {
+            return false;
+        }
+
+        PasswordPolicyDto politica = obtenerPoliticaPasswordEmpresa(idEmpresa);
+        return password.matches(politica.getRegex());
+    }
+
+    /**
+     * Valida la contraseña y lanza una excepción si no cumple (Ideal para el UsuarioService)
+     */
+    public void validarPasswordEstricto(Integer idEmpresa, String password) {
+        if (password == null || password.trim().isEmpty()) {
+            throw new BusinessException(UsuarioError.AUTH_PASSWORD_EMPTY);
+        }
+
+        PasswordPolicyDto politica = obtenerPoliticaPasswordEmpresa(idEmpresa);
+
+        if (!password.matches(politica.getRegex())) {
+            throw new BusinessException(UsuarioError.AUTH_INVALID_POLICY);
+        }
     }
 }

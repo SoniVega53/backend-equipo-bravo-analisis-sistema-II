@@ -1,10 +1,10 @@
 package backend_equipo_bravo.analisis_sistema_II.controller;
 
-import backend_equipo_bravo.analisis_sistema_II.dto.genero.GeneroRequest;
-import backend_equipo_bravo.analisis_sistema_II.entity.Genero;
+import backend_equipo_bravo.analisis_sistema_II.dto.StatusUsuarioRequest;
+import backend_equipo_bravo.analisis_sistema_II.entity.StatusUsuario;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCode;
-import backend_equipo_bravo.analisis_sistema_II.service.GeneroService;
+import backend_equipo_bravo.analisis_sistema_II.service.StatusUsuarioService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,16 +14,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/console/genero")
-@Tag(name = "Genero", description = "Endpoints para CRUD genero")
-public class GeneroController extends BaseController {
+@RequestMapping("/api/console/status-usuario")
+@Tag(name = "Status Usuario", description = "Endpoints para CRUD Status Usuario")
+public class StatusUsuarioController extends BaseController {
+
     @Autowired
-    private GeneroService generoService;
+    private StatusUsuarioService statusUsuarioService;
 
     @GetMapping
     public ResponseEntity<?> listarTodos() {
         try {
-            return success(generoService.buscarTodosPermisos(), SuccessCode.GENERO_GENERAL);
+            return success(statusUsuarioService.buscarTodosPermisos(), SuccessCode.STATUS_USUARIO_GENERAL);
         }catch (BusinessException e) {
             return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
         }
@@ -32,30 +33,29 @@ public class GeneroController extends BaseController {
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerPorId(@PathVariable Integer id) {
         try {
-            return success(generoService.buscarPorIdPermisos(id), SuccessCode.GENERO_GENERAL);
+            return success(statusUsuarioService.buscarPorIdPermisos(id), SuccessCode.STATUS_USUARIO_GENERAL);
         } catch (BusinessException e) {
             return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@RequestBody GeneroRequest genero) {
-        try{
-            Genero creado = generoService.crear(genero);
-
-            Map<String, Object> data = Map.of("genero", creado);
-            return success(data, SuccessCode.GENERO_SUCCESS);
+    public ResponseEntity<?> crear(@RequestBody StatusUsuarioRequest request) {
+        try {
+            StatusUsuario creada = statusUsuarioService.crear(request);
+            Map<String, Object> data = Map.of("status-usuario", creada);
+            return success(data, SuccessCode.STATUS_USUARIO_SUCCESS);
         }catch (BusinessException e) {
             return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody GeneroRequest genero) {
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody StatusUsuarioRequest request) {
         try {
-            Genero actualizado = generoService.actualizar(id,genero);
-            Map<String, Object> data = Map.of("genero", actualizado);
-            return success(data, SuccessCode.GENERO_UPDATED_SUCCESS);
+            StatusUsuario actualizada = statusUsuarioService.actualizar(id, request);
+            Map<String, Object> data = Map.of("status-usuario", actualizada);
+            return success(data, SuccessCode.STATUS_USUARIO_UPDATED_SUCCESS);
         } catch (BusinessException e) {
             return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
         }
@@ -64,8 +64,8 @@ public class GeneroController extends BaseController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Integer id) {
         try {
-            generoService.eliminarBasePermisos(id);
-            return success(null, SuccessCode.GENERO_DELETED_SUCCESS);
+            statusUsuarioService.eliminarBasePermisos(id);
+            return success(null, SuccessCode.STATUS_USUARIO_DELETED_SUCCESS);
         } catch (BusinessException e) {
             return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
         }

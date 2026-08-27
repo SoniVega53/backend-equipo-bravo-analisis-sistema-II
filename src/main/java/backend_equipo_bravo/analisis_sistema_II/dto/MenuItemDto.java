@@ -14,6 +14,7 @@ import java.util.List;
 public class MenuItemDto {
 
     private String id;
+
     private Integer code;
 
     private String label;

@@ -1,6 +1,8 @@
 package backend_equipo_bravo.analisis_sistema_II.controller;
 
 import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -10,6 +12,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public abstract class BaseController {
+    public static final Logger log = LoggerFactory.getLogger(BaseController.class);
 
     protected ResponseEntity<Map<String, Object>> success(Object data, SuccessCode successCode) {
         Map<String, Object> response = new HashMap<>();

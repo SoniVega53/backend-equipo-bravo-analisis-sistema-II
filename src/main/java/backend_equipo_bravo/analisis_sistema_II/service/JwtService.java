@@ -40,4 +40,12 @@ public class JwtService {
                 .getBody()
                 .getSubject();
     }
+
+    public Integer obtenerRolDelToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(getSigningKey())
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", Integer.class);
+    }
 }
