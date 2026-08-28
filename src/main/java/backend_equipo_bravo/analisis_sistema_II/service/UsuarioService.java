@@ -11,6 +11,7 @@ import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError
 import backend_equipo_bravo.analisis_sistema_II.repository.*;
 import backend_equipo_bravo.analisis_sistema_II.utils.FechaUtil;
 import backend_equipo_bravo.analisis_sistema_II.utils.FormatoFecha;
+import jakarta.transaction.Transactional;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,15 +19,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UsuarioService {
+    private final String UPLOAD_DIR = "uploads/perfiles/";
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -277,6 +282,7 @@ public class UsuarioService {
 
         UsuarioPerfilResponse response = new UsuarioPerfilResponse();
 
+        response.setIdUsuario(usuario.getIdUsuario());
         response.setNombre(usuario.getNombre());
         response.setApellido(usuario.getApellido());
         response.setFechaNacimiento(usuario.getFechaNacimiento());
@@ -519,4 +525,40 @@ public class UsuarioService {
             return usuarioRepository.save(data);
         }
     }
+
+
+    @Transactional
+    public String actualizarFotografia(String idUsuario, MultipartFile file) throws BusinessException {
+        try {
+            Usuario usuario = usuarioRepository.findByIdUsuario(idUsuario)
+                    .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+            byte[] bytesImagen = file.getBytes();
+            usuario.setFotografia(bytesImagen);
+            usuarioRepository.save(usuario);
+
+            String base64Image = Base64.getEncoder().encodeToString(bytesImagen);
+            String mimeType = file.getContentType();
+            return "data:" + mimeType + ";base64," + base64Image;
+
+        } catch (IOException e) {
+            throw new BusinessException(UsuarioError.FILE_ERROR);
+        }
+    }
+
+    public String obtenerFotografiaBase64() throws BusinessException {
+        String idUsuarioLogg = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLogg)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        if (usuario.getFotografia() == null || usuario.getFotografia().length == 0) {
+            return null;
+        }
+
+        String base64Image = Base64.getEncoder().encodeToString(usuario.getFotografia());
+
+        return "data:image/jpeg;base64," + base64Image;
+    }
+
 }

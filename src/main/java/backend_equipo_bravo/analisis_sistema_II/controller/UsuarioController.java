@@ -8,11 +8,15 @@ import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError
 import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCode;
 import backend_equipo_bravo.analisis_sistema_II.service.PoliticasSeguridadService;
 import backend_equipo_bravo.analisis_sistema_II.service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -162,9 +166,49 @@ public class UsuarioController extends BaseController{
     public ResponseEntity<?> eliminar(@PathVariable String idUsuario) {
         try {
             usuarioService.eliminarUsuario(idUsuario);
-            return success("Se elimino correctamente", SuccessCode.GENERO_GENERAL);
+            return success("Se elimino correctamente", SuccessCode.GENERAL);
         } catch (BusinessException e) {
             return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping(value = "/{id}/fotografia", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Actualizar fotografía", description = "Guarda la foto como BYTEA en BD y retorna el Base64")
+    public ResponseEntity<Map<String, Object>> actualizarFotografia(
+            @Parameter(description = "ID del usuario (String)") @PathVariable String id,
+            @Parameter(description = "Archivo de imagen a subir") @RequestParam("file") MultipartFile file) {
+
+        try {
+            if (file.isEmpty()) {
+                return error(400, "FILE_EMPTY", "El archivo de imagen está vacío", HttpStatus.BAD_REQUEST);
+            }
+
+            String base64Url = usuarioService.actualizarFotografia(id, file);
+
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("nuevaUrl", base64Url);
+            responseData.put("mensaje", "Fotografía actualizada correctamente");
+
+            return success(responseData, SuccessCode.GENERAL);
+
+        } catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return error(500, "INTERNAL_ERROR", "Error interno: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/fotografia")
+    public ResponseEntity<Map<String, Object>> obtenerFotografia() {
+        try {
+            String base64Url = usuarioService.obtenerFotografiaBase64();
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("fotografia", base64Url);
+            return success(responseData, SuccessCode.GENERAL);
+        } catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return error(500, "INTERNAL_ERROR", "Error al obtener la imagen: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -12,6 +12,8 @@ public enum UsuarioError {
     AUTH_TOKEN_EXPIRED(105, "AUTH_TOKEN_EXPIRED", "La sesión ha expirado. Por favor, ingrese de nuevo.", "El JWT enviado ya pasó su tiempo de vida configurado."),
     AUTH_UNAUTHORIZED(106, "AUTH_UNAUTHORIZED", "Acceso denegado: No tiene permisos suficientes.", "El usuario intenta realizar una acción o entrar a un módulo para el que no tiene rol."),
     AUTH_NO_AUTHORIZED(107, "AUTH_NO_AUTHORIZED", "Usuario no logeado correctamente.", "No existe usuario."),
+    INVALID_FORMAT(400, "INVALID_FORMAT", "El archivo debe ser una imagen.", ""),
+    FILE_ERROR(500, "FILE_ERROR", "Error al guardar el archivo en el servidor.", ""),
 
     AUTH_NO_AUTHORIZED_VIEW(4001, "AUTH_NO_AUTHORIZED_VIEW", "No tiene Permisos para ver los registros.", "Permisos Insuficientes."),
     AUTH_NO_AUTHORIZED_MODIFY(4002, "AUTH_NO_AUTHORIZED_MODIFY", "No tiene Permisos para modificar el registro.", "Permisos Insuficientes."),

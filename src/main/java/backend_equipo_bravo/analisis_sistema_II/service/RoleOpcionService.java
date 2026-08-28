@@ -104,7 +104,7 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
                 if (item.getAlta() == 0 && item.getBaja() == 0 && item.getCambio() == 0 &&
                         item.getConsultar() == 0 && item.getExportar() == 0 && item.getImprimir() == 0) {
                     roleOpcionRepository.delete(optData.get());
-                    return;
+                    continue;
                 }
 
                 data = optData.get();
