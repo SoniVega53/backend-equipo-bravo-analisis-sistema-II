@@ -2,19 +2,19 @@ package backend_equipo_bravo.analisis_sistema_II.service;
 
 import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioPerfilRequest;
 import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioPerfilResponse;
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdatePasswordRequest;
+//import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdatePasswordRequest;
 import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdateRequest;
 import backend_equipo_bravo.analisis_sistema_II.entity.Empresa;
-import backend_equipo_bravo.analisis_sistema_II.entity.Genero;
+//import backend_equipo_bravo.analisis_sistema_II.entity.Genero;
 import backend_equipo_bravo.analisis_sistema_II.entity.Sucursal;
 import backend_equipo_bravo.analisis_sistema_II.entity.Usuario;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.EmpresaError;
-import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.GeneralError;
+//import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.GeneralError;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.SucursalError;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError;
 import backend_equipo_bravo.analisis_sistema_II.repository.EmpresaRepository;
-import backend_equipo_bravo.analisis_sistema_II.repository.GeneroRepository;
+//import backend_equipo_bravo.analisis_sistema_II.repository.GeneroRepository;
 import backend_equipo_bravo.analisis_sistema_II.repository.SucursalRepository;
 import backend_equipo_bravo.analisis_sistema_II.repository.UsuarioRepository;
 import backend_equipo_bravo.analisis_sistema_II.utils.FechaUtil;
@@ -23,9 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioCreateRequest;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+//import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -42,14 +43,74 @@ public class UsuarioService {
     @Autowired
     private EmpresaRepository empresaRepository;
 
-    @Autowired
-    private GeneroRepository generoRepository;
+    //@Autowired
+    //private GeneroRepository generoRepository;
 
     @Autowired
     private PoliticasSeguridadService politicasService;
 
     @Autowired
     private AuditoriaService auditoriaService;
+
+    public java.util.List<Usuario> listarUsuarios() {
+    return usuarioRepository.findAll();
+    }
+
+    public Usuario buscarUsuario(String idUsuario) {
+
+    return usuarioRepository.findByIdUsuario(idUsuario)
+            .orElseThrow(() ->
+                    new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+    }
+
+    public void eliminarUsuario(String idUsuario) {
+
+    Usuario usuario = usuarioRepository.findByIdUsuario(idUsuario)
+            .orElseThrow(() ->
+                    new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+    usuarioRepository.delete(usuario);
+    }
+
+    public Usuario crearUsuario(UsuarioCreateRequest request) {
+
+    String usuarioActual =
+            SecurityContextHolder.getContext().getAuthentication().getName();
+
+    if (usuarioRepository.findByIdUsuario(request.getIdUsuario()).isPresent()) {
+        throw new BusinessException(UsuarioError.AUTH_UNAUTHORIZED);
+    }
+
+    Usuario usuario = new Usuario();
+
+    usuario.setIdUsuario(request.getIdUsuario());
+    usuario.setNombre(request.getNombre());
+    usuario.setApellido(request.getApellido());
+    usuario.setFechaNacimiento(request.getFechaNacimiento());
+    usuario.setCorreoElectronico(request.getCorreoElectronico());
+    usuario.setTelefonoMovil(request.getTelefonoMovil());
+
+    usuario.setIdGenero(request.getIdGenero());
+    usuario.setIdRole(request.getIdRole());
+    usuario.setIdStatusUsuario(request.getIdStatusUsuario());
+    usuario.setIdSucursal(request.getIdSucursal());
+
+    usuario.setPassword(
+            passwordEncoder.encode(request.getPassword())
+    );
+
+    usuario.setPregunta(request.getPregunta());
+    usuario.setRespuesta(request.getRespuesta());
+
+    usuario.setIntentosDeAcceso(0);
+    usuario.setRequiereCambiarPassword(1);
+    usuario.setSesionActual(null);
+
+    usuario.setFechaCreacion(LocalDateTime.now());
+    usuario.setUsuarioCreacion(usuarioActual);
+
+    return usuarioRepository.save(usuario);
+    }
 
     public Usuario actualizarUsuario(String idUsuarioActualizar, UsuarioUpdateRequest request) {
         String idUsuarioEjecutor = SecurityContextHolder.getContext().getAuthentication().getName();

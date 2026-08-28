@@ -12,13 +12,17 @@ import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCod
 import backend_equipo_bravo.analisis_sistema_II.service.PoliticasSeguridadService;
 import backend_equipo_bravo.analisis_sistema_II.service.UsuarioService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioCreateRequest;
 
 import java.util.HashMap;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -30,6 +34,70 @@ public class UsuarioController extends BaseController{
 
     @Autowired
     private PoliticasSeguridadService empresaService;
+
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> crear(
+        @Valid @RequestBody UsuarioCreateRequest request) {
+
+    try {
+        Usuario usuario = usuarioService.crearUsuario(request);
+
+        Map<String, Object> data = Map.of(
+                "usuario", usuario.getIdUsuario()
+        );
+
+        return success(data, SuccessCode.USER_UPDATED_SUCCESS);
+
+    } catch (BusinessException e) {
+        return error(
+                e.getCodigoNumerico(),
+                e.getCodigoTexto(),
+                e.getMessage(),
+                HttpStatus.UNAUTHORIZED
+        );
+    }
+    }
+
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> listar() {
+
+    try {
+        return success(
+                usuarioService.listarUsuarios(),
+                SuccessCode.AUTH_LOGIN_SUCCESS
+        );
+
+    } catch (BusinessException e) {
+        return error(
+                e.getCodigoNumerico(),
+                e.getCodigoTexto(),
+                e.getMessage(),
+                HttpStatus.UNAUTHORIZED
+        );
+    }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> buscar(
+        @PathVariable("id") String idUsuario) {
+
+    try {
+        Usuario usuario = usuarioService.buscarUsuario(idUsuario);
+
+        return success(
+                usuario,
+                SuccessCode.AUTH_LOGIN_SUCCESS
+        );
+
+    } catch (BusinessException e) {
+        return error(
+                e.getCodigoNumerico(),
+                e.getCodigoTexto(),
+                e.getMessage(),
+                HttpStatus.UNAUTHORIZED
+        );
+    }
+    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> actualizar(@PathVariable("id") String idUsuario, @RequestBody UsuarioUpdateRequest request) {
@@ -47,6 +115,28 @@ public class UsuarioController extends BaseController{
                     HttpStatus.UNAUTHORIZED
             );
         }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> eliminar(
+        @PathVariable("id") String idUsuario) {
+
+    try {
+        usuarioService.eliminarUsuario(idUsuario);
+
+        return success(
+                "Usuario eliminado correctamente",
+                SuccessCode.AUTH_LOGIN_SUCCESS
+        );
+
+    } catch (BusinessException e) {
+        return error(
+                e.getCodigoNumerico(),
+                e.getCodigoTexto(),
+                e.getMessage(),
+                HttpStatus.UNAUTHORIZED
+        );
+    }
     }
 
     @PutMapping("/primerIngreso")
