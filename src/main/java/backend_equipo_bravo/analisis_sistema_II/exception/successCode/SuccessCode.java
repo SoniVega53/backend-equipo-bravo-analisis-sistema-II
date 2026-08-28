@@ -18,6 +18,11 @@ public enum SuccessCode {
     GENERO_UPDATED_SUCCESS(200, "GENERAL_SUCCESS", "Genero actualizado Correctamente."),
     GENERO_DELETED_SUCCESS(200, "GENERAL_SUCCESS", "Genero eliminado Correctamente."),
 
+    STATUS_USUARIO_GENERAL(200, "GENERAL_SUCCESS", "Estatus de usuario obtenidos correctamente."),
+    STATUS_USUARIO_SUCCESS(200, "GENERAL_SUCCESS", "Estatus de usuario creado correctamente."),
+    STATUS_USUARIO_UPDATED_SUCCESS(200, "GENERAL_SUCCESS", "Estatus de usuario actualizado correctamente."),
+    STATUS_USUARIO_DELETED_SUCCESS(200, "GENERAL_SUCCESS", "Estatus de usuario eliminado correctamente."),
+
     TIPO_ACCESO_SUCCESS(200, "TIPO_ACCESO_SUCCESS", "Tipo de acceso creado Correctamente."),
     TIPO_ACCESO_GENERAL(200, "TIPO_ACCESO_GENERAL", "Consulta Exitosa."),
     TIPO_ACCESO_UPDATED_SUCCESS(200, "TIPO_ACCESO_UPDATED_SUCCESS", "Tipo de acceso actualizado Correctamente."),
