@@ -277,6 +277,26 @@ public class UsuarioController extends BaseController{
         }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> eliminarv2(
+            @PathVariable("id") String idUsuario) {
 
+        try {
+            usuarioService.eliminarUsuario(idUsuario);
+
+            return success(
+                    "Usuario eliminado correctamente",
+                    SuccessCode.AUTH_LOGIN_SUCCESS
+            );
+
+        } catch (BusinessException e) {
+            return error(
+                    e.getCodigoNumerico(),
+                    e.getCodigoTexto(),
+                    e.getMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+    }
 
 }
