@@ -2,72 +2,71 @@ package backend_equipo_bravo.analisis_sistema_II.controller;
 
 import backend_equipo_bravo.analisis_sistema_II.dto.RoleRequest;
 import backend_equipo_bravo.analisis_sistema_II.entity.Role;
-import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
-import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCode;
 import backend_equipo_bravo.analisis_sistema_II.service.RoleService;
-import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/console/role")
-@Tag(name = "Role", description = "Endpoints para CRUD de Roles")
-public class RoleController extends BaseController {
+@RequestMapping("/api/roles")
+@CrossOrigin(origins = "*")
+public class RoleController {
 
     @Autowired
     private RoleService roleService;
 
     @GetMapping
-    public ResponseEntity<?> listarTodos() {
-        try {
-            return success(roleService.buscarTodosPermisos(), SuccessCode.ROLE_GENERAL);
-        } catch (BusinessException e) {
-            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<List<Role>> listar() {
+
+        return ResponseEntity.ok(
+                roleService.buscarTodos()
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> obtenerPorId(@PathVariable Integer id) {
-        try {
-            return success(roleService.buscarPorIdPermisos(id), SuccessCode.ROLE_GENERAL);
-        } catch (BusinessException e) {
-            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Role> obtenerPorId(
+            @PathVariable Integer id
+    ) {
+
+        return ResponseEntity.ok(
+                roleService.buscarPorId(id)
+        );
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@RequestBody RoleRequest role) {
-        try {
-            Role creado = roleService.crear(role);
-            Map<String, Object> data = Map.of("role", creado);
-            return success(data, SuccessCode.ROLE_SUCCESS);
-        } catch (BusinessException e) {
-            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<Role> crear(
+            @RequestBody RoleRequest request
+    ) {
+
+        return ResponseEntity.ok(
+                roleService.crear(request)
+        );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody RoleRequest role) {
-        try {
-            Role actualizado = roleService.actualizar(id, role);
-            Map<String, Object> data = Map.of("role", actualizado);
-            return success(data, SuccessCode.ROLE_UPDATED_SUCCESS);
-        } catch (BusinessException e) {
-            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Role> actualizar(
+            @PathVariable Integer id,
+            @RequestBody RoleRequest request
+    ) {
+
+        return ResponseEntity.ok(
+                roleService.actualizar(
+                        id,
+                        request
+                )
+        );
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
-        try {
-            roleService.eliminarBasePermisos(id);
-            return success(null, SuccessCode.ROLE_DELETED_SUCCESS);
-        } catch (BusinessException e) {
-            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Void> eliminar(
+            @PathVariable Integer id
+    ) {
+
+        roleService.eliminarBase(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

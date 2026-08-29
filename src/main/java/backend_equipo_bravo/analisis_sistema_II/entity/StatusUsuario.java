@@ -2,6 +2,7 @@ package backend_equipo_bravo.analisis_sistema_II.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -14,13 +15,13 @@ public class StatusUsuario {
     @Column(name = "idstatususuario")
     private Integer idStatusUsuario;
 
-    @Column(name = "nombre", nullable = false)
+    @Column(name = "nombre")
     private String nombre;
 
-    @Column(name = "fechacreacion", nullable = false)
+    @Column(name = "fechacreacion")
     private LocalDateTime fechaCreacion;
 
-    @Column(name = "usuariocreacion", nullable = false)
+    @Column(name = "usuariocreacion")
     private String usuarioCreacion;
 
     @Column(name = "fechamodificacion")

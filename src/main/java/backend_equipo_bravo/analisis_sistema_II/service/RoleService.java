@@ -4,9 +4,12 @@ import backend_equipo_bravo.analisis_sistema_II.dto.RoleRequest;
 import backend_equipo_bravo.analisis_sistema_II.entity.Role;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.GeneralError;
+import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError;
 import backend_equipo_bravo.analisis_sistema_II.repository.RoleRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,35 +26,56 @@ public class RoleService extends BaseService<Role, Integer> {
     }
 
     @Override
-    protected RuntimeException getNotFoundException(Integer id) {
-        return new BusinessException(GeneralError.ROLE_NOT_FOUND);
+    protected RuntimeException getNotFoundException(Integer integer) {
+        return new BusinessException(GeneralError.ERROR_SERVICE);
     }
 
     public Role crear(RoleRequest request) {
-        String usuarioActual = obtenerUsuarioAutenticado();
+
+        String usuarioActual =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        if (usuarioActual == null) {
+            throw new BusinessException(
+                    UsuarioError.AUTH_NO_AUTHORIZED
+            );
+        }
 
         Role role = new Role();
-        mapearDatosRequest(role, request);
 
+        role.setNombre(request.getNombre());
         role.setUsuarioCreacion(usuarioActual);
         role.setFechaCreacion(LocalDateTime.now());
 
-        return super.crearBasePermisos(role);
+        return super.crearBase(role);
     }
 
-    public Role actualizar(Integer id, RoleRequest request) {
+    public Role actualizar(
+            Integer id,
+            RoleRequest request
+    ) {
+
         Role existente = super.buscarPorId(id);
-        String usuarioActual = obtenerUsuarioAutenticado();
 
-        mapearDatosRequest(existente, request);
+        String usuarioActual =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
 
+        if (usuarioActual == null) {
+            throw new BusinessException(
+                    UsuarioError.AUTH_NO_AUTHORIZED
+            );
+        }
+
+        existente.setNombre(request.getNombre());
         existente.setUsuarioModificacion(usuarioActual);
         existente.setFechaModificacion(LocalDateTime.now());
 
-        return super.actualizarBasePermisos(existente);
-    }
-
-    private void mapearDatosRequest(Role role, RoleRequest request) {
-        role.setNombre(request.getNombre());
+        return super.actualizarBase(existente);
     }
 }
