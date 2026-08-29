@@ -47,7 +47,6 @@ public class RoleService extends BaseService<Role, Integer> {
         Role role = new Role();
 
         role.setNombre(request.getNombre());
-        role.setDescripcion(request.getDescripcion());
         role.setUsuarioCreacion(usuarioActual);
         role.setFechaCreacion(LocalDateTime.now());
 
@@ -74,7 +73,6 @@ public class RoleService extends BaseService<Role, Integer> {
         }
 
         existente.setNombre(request.getNombre());
-        existente.setDescripcion(request.getDescripcion());
         existente.setUsuarioModificacion(usuarioActual);
         existente.setFechaModificacion(LocalDateTime.now());
 
