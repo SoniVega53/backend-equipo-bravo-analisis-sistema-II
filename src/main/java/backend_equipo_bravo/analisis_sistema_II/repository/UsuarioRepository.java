@@ -1,6 +1,7 @@
 package backend_equipo_bravo.analisis_sistema_II.repository;
 
 import backend_equipo_bravo.analisis_sistema_II.entity.Usuario;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,7 +11,10 @@ import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, String> {
+
     Optional<Usuario> findByIdUsuario(String idUsuario);
+
+    Optional<Usuario> findByIdUsuarioAndRespuesta(String idUsuario, String respuesta);
 
     @Query("""
                 SELECT u.idSucursal
@@ -20,4 +24,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, String> {
     Optional<Integer> findIdSucursalByIdUsuario(
             @Param("idUsuario") String idUsuario
     );
+
 }
