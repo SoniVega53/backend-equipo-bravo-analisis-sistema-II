@@ -50,7 +50,7 @@ public class PoliticasSeguridadService {
     }
 
 
-    public PasswordPolicyDto obtenerPoliticaPasswordEmpresa(Integer idEmpresa){
+    public PasswordPolicyDto obtenerPoliticaPasswordEmpresa(Integer idEmpresa) {
         Empresa empresa = empresaRepository.findById(idEmpresa)
                 .orElseThrow(() -> new BusinessException(EmpresaError.EMPRESA_NOT_FOUND));
 
@@ -144,4 +144,180 @@ public class PoliticasSeguridadService {
             throw new BusinessException(UsuarioError.AUTH_INVALID_POLICY);
         }
     }
+
+    public PasswordPolicyDto obtenerPoliticaPasswordPorUsuario(
+            String idUsuario
+    ) {
+
+        if (
+                idUsuario == null ||
+                        idUsuario.trim().isEmpty()
+        ) {
+            return obtenerPoliticaDefault();
+        }
+
+        Integer idSucursal = usuarioRepository
+                .findIdSucursalByIdUsuario(
+                        idUsuario.trim()
+                )
+                .orElse(null);
+
+        if (idSucursal == null) {
+            return obtenerPoliticaDefault();
+        }
+
+        return obtenerPoliticaPorSucursal(idSucursal);
+    }
+
+    private PasswordPolicyDto obtenerPoliticaPorSucursal(
+            Integer idSucursal
+    ) {
+
+        Sucursal sucursal = sucursalRepository
+                .findById(idSucursal)
+                .orElseThrow(() ->
+                        new BusinessException(
+                                SucursalError.SUCURSAL_NOT_FOUND
+                        )
+                );
+
+        Empresa empresa = empresaRepository
+                .findById(sucursal.getIdEmpresa())
+                .orElseThrow(() ->
+                        new BusinessException(
+                                EmpresaError.EMPRESA_NOT_FOUND
+                        )
+                );
+
+        return construirPoliticaPassword(empresa);
+    }
+
+    private PasswordPolicyDto construirPoliticaPassword(
+            Empresa empresa
+    ) {
+
+        StringBuilder regex =
+                new StringBuilder("^");
+
+        StringBuilder mensaje =
+                new StringBuilder(
+                        "La contraseña debe tener"
+                );
+
+        int minMayus =
+                nvl(
+                        empresa.getPasswordCantidadMayusculas()
+                );
+
+        if (minMayus > 0) {
+
+            regex.append(
+                            "(?=(?:.*?[A-Z]){"
+                    )
+                    .append(minMayus)
+                    .append("})");
+
+            mensaje.append(", ")
+                    .append(minMayus)
+                    .append(" mayúscula(s)");
+        }
+
+        int minMinus =
+                nvl(
+                        empresa.getPasswordCantidadMinusculas()
+                );
+
+        if (minMinus > 0) {
+
+            regex.append(
+                            "(?=(?:.*?[a-z]){"
+                    )
+                    .append(minMinus)
+                    .append("})");
+
+            mensaje.append(", ")
+                    .append(minMinus)
+                    .append(" minúscula(s)");
+        }
+
+        int minNumeros =
+                nvl(
+                        empresa.getPasswordCantidadNumeros()
+                );
+
+        if (minNumeros > 0) {
+
+            regex.append(
+                            "(?=(?:.*?\\d){"
+                    )
+                    .append(minNumeros)
+                    .append("})");
+
+            mensaje.append(", ")
+                    .append(minNumeros)
+                    .append(" número(s)");
+        }
+
+        int minEspeciales =
+                nvl(
+                        empresa.getPasswordCantidadCaracteresEspeciales()
+                );
+
+        if (minEspeciales > 0) {
+
+            regex.append(
+                            "(?=(?:.*?[!@#$%^&*()_+=\\[\\]{};':\"\\\\|,.<>\\/?-]){"
+                    )
+                    .append(minEspeciales)
+                    .append("})");
+
+            mensaje.append(", ")
+                    .append(minEspeciales)
+                    .append(" carácter(es) especial(es)");
+        }
+
+        int largoMinimo =
+                nvl(
+                        empresa.getPasswordLargo(),
+                        8
+                );
+
+        regex.append(".{")
+                .append(largoMinimo)
+                .append(",}$");
+
+        mensaje.append(" y un mínimo de ")
+                .append(largoMinimo)
+                .append(" caracteres.");
+
+        String mensajeFinal =
+                mensaje
+                        .toString()
+                        .replace(
+                                "tener, ",
+                                "tener al menos: "
+                        );
+
+        return PasswordPolicyDto
+                .builder()
+                .regex(regex.toString())
+                .mensajeValidacion(mensajeFinal)
+                .largoMinimo(largoMinimo)
+                .build();
+    }
+
+    private PasswordPolicyDto obtenerPoliticaDefault() {
+
+        int largoMinimo = 8;
+
+        return PasswordPolicyDto
+                .builder()
+                .regex("^.{8,}$")
+                .mensajeValidacion(
+                        "La contraseña debe tener un mínimo de 8 caracteres."
+                )
+                .largoMinimo(largoMinimo)
+                .build();
+    }
+
 }

@@ -11,6 +11,7 @@ import backend_equipo_bravo.analisis_sistema_II.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -211,4 +212,71 @@ public class UsuarioController extends BaseController{
             return error(500, "INTERNAL_ERROR", "Error al obtener la imagen: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> crear(
+            @Valid @RequestBody UsuarioCreateRequest request) {
+
+        try {
+            Usuario usuario = usuarioService.crearUsuario(request);
+
+            Map<String, Object> data = Map.of(
+                    "usuario", usuario.getIdUsuario()
+            );
+
+            return success(data, SuccessCode.USER_UPDATED_SUCCESS);
+
+        } catch (BusinessException e) {
+            return error(
+                    e.getCodigoNumerico(),
+                    e.getCodigoTexto(),
+                    e.getMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> listar() {
+
+        try {
+            return success(
+                    usuarioService.buscarTodos(),
+                    SuccessCode.AUTH_LOGIN_SUCCESS
+            );
+
+        } catch (BusinessException e) {
+            return error(
+                    e.getCodigoNumerico(),
+                    e.getCodigoTexto(),
+                    e.getMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> buscar(
+            @PathVariable("id") String idUsuario) {
+
+        try {
+            Usuario usuario = usuarioService.buscarUsuario(idUsuario);
+
+            return success(
+                    usuario,
+                    SuccessCode.AUTH_LOGIN_SUCCESS
+            );
+
+        } catch (BusinessException e) {
+            return error(
+                    e.getCodigoNumerico(),
+                    e.getCodigoTexto(),
+                    e.getMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+    }
+
+
+
 }
