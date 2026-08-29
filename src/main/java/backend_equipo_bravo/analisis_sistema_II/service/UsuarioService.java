@@ -1,9 +1,7 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioPerfilRequest;
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioPerfilResponse;
+import backend_equipo_bravo.analisis_sistema_II.dto.usuario.*;
 //import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdatePasswordRequest;
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdateRequest;
 import backend_equipo_bravo.analisis_sistema_II.entity.Empresa;
 //import backend_equipo_bravo.analisis_sistema_II.entity.Genero;
 import backend_equipo_bravo.analisis_sistema_II.entity.Sucursal;
@@ -23,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioCreateRequest;
 
 import java.time.LocalDateTime;
 //import java.util.Optional;
@@ -309,6 +306,131 @@ public class UsuarioService {
         usuario.setIntentosDeAcceso(0);
 
         return usuarioRepository.save(usuario);
+    }
+
+    public UsuarioPreguntaResponse obtenerPregunta(
+            String idUsuario
+    ) {
+
+        Usuario usuario =
+                usuarioRepository.findByIdUsuario(idUsuario)
+                        .orElseThrow(() ->
+                                new BusinessException(
+                                        UsuarioError.AUTH_USER_NOT_FOUND
+                                ));
+
+        UsuarioPreguntaResponse response =
+                new UsuarioPreguntaResponse();
+
+        response.setPregunta(usuario.getPregunta());
+
+        return response;
+    }
+
+    public boolean validarRespuesta(
+            ValidarPreguntasRequest request
+    ) {
+
+        if (
+                request.getIdUsuario() == null ||
+                        request.getRespuesta() == null
+        ) {
+            return false;
+        }
+
+        Usuario usuario =
+                usuarioRepository.findByIdUsuario(
+                        request.getIdUsuario().trim()
+                ).orElse(null);
+
+        if (
+                usuario == null ||
+                        usuario.getRespuesta() == null
+        ) {
+            return false;
+        }
+
+        String respuestaIngresada =
+                request.getRespuesta()
+                        .trim()
+                        .toLowerCase();
+
+        String respuestaGuardada =
+                usuario.getRespuesta()
+                        .trim()
+                        .toLowerCase();
+
+        return respuestaGuardada.equals(
+                respuestaIngresada
+        );
+    }
+
+    public void recuperarPassword(
+            RecuperarPasswordUpdateRequest request
+    ) {
+
+        if (
+                request.getIdUsuario() == null ||
+                        request.getRespuesta() == null
+        ) {
+            throw new BusinessException(
+                    UsuarioError.AUTH_USER_NOT_FOUND
+            );
+        }
+
+        Usuario usuario =
+                usuarioRepository.findByIdUsuario(
+                        request.getIdUsuario().trim()
+                ).orElseThrow(() ->
+                        new BusinessException(
+                                UsuarioError.AUTH_USER_NOT_FOUND
+                        ));
+
+        if (usuario.getRespuesta() == null) {
+            throw new BusinessException(
+                    UsuarioError.AUTH_USER_NOT_FOUND
+            );
+        }
+
+        String respuestaIngresada =
+                request.getRespuesta()
+                        .trim()
+                        .toLowerCase();
+
+        String respuestaGuardada =
+                usuario.getRespuesta()
+                        .trim()
+                        .toLowerCase();
+
+        if (!respuestaGuardada.equals(respuestaIngresada)) {
+            throw new BusinessException(
+                    UsuarioError.AUTH_USER_NOT_FOUND
+            );
+        }
+
+        if (
+                request.getPassword() == null ||
+                        request.getPassword().isEmpty()
+        ) {
+            throw new BusinessException(
+                    UsuarioError.AUTH_PASSWORD_EMPTY
+            );
+        }
+
+        usuario.setPassword(
+                passwordEncoder.encode(
+                        request.getPassword()
+                )
+        );
+
+        usuario.setUltimaFechaCambioPassword(
+                LocalDateTime.now()
+        );
+
+        usuario.setRequiereCambiarPassword(0);
+        usuario.setIntentosDeAcceso(0);
+
+        usuarioRepository.save(usuario);
     }
 
 }
