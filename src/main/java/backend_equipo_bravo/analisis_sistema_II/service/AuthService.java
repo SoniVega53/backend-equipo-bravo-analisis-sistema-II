@@ -80,7 +80,7 @@ public class AuthService {
 
         Map<String,Object> data = new HashMap<>();
         data.put("token",token);
-        int numChan = usuario.getRequiereCambiarPassword();
+        int numChan = usuario.getRequiereCambiarPassword() != null ? usuario.getRequiereCambiarPassword() : 1;
         data.put("changePassword",numChan);
 
         return data;
