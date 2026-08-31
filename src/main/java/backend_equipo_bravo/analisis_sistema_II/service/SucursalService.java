@@ -1,6 +1,8 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
+import backend_equipo_bravo.analisis_sistema_II.entity.Empresa;
 import backend_equipo_bravo.analisis_sistema_II.entity.Sucursal;
+import backend_equipo_bravo.analisis_sistema_II.repository.EmpresaRepository;
 import backend_equipo_bravo.analisis_sistema_II.repository.SucursalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,9 @@ public class SucursalService {
 
     @Autowired
     private SucursalRepository sucursalRepository;
+
+    @Autowired
+    private EmpresaRepository empresaRepository;
 
     public List<Sucursal> listarTodas() {
         return sucursalRepository.findAll();
@@ -31,10 +36,6 @@ public class SucursalService {
             sucursal.setNombre(sucursalDetalles.getNombre());
             sucursal.setDireccion(sucursalDetalles.getDireccion());
             sucursal.setIdEmpresa(sucursalDetalles.getIdEmpresa());
-            
-            if (sucursalDetalles.getEmpresa() != null) {
-                sucursal.setEmpresa(sucursalDetalles.getEmpresa());
-            }
 
             return sucursalRepository.save(sucursal);
         }).orElseThrow(() -> new RuntimeException("Sucursal no encontrada con id: " + id));
