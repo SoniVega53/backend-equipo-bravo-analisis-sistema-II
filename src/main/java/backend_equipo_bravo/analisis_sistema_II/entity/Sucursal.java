@@ -1,22 +1,48 @@
 package backend_equipo_bravo.analisis_sistema_II.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+
+// Si Empresa está en otro paquete, agrégalo aquí. De lo contrario, asegúrate que Empresa.java tenga 'package backend_equipo_bravo.analisis_sistema_II.entity;'
+import backend_equipo_bravo.analisis_sistema_II.entity.Empresa;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "sucursal")
+@Table(name = "SUCURSAL", schema = "ProyectoAnalisis")
 public class Sucursal {
+
     @Id
-    @Column(name = "idsucursal")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "IdSucursal")
     private Integer idSucursal;
 
-    @Column(name = "idempresa")
+    @Column(name = "Nombre", nullable = false)
+    private String nombre;
+
+    @Column(name = "Direccion", nullable = false)
+    private String direccion;
+
+    @Column(name = "IdEmpresa", nullable = false, insertable = false, updatable = false)
     private Integer idEmpresa;
 
-    @Column(name = "nombre")
-    private String nombre;
+    @ManyToOne
+    @JoinColumn(name = "IdEmpresa", nullable = false)
+    private Empresa empresa;
+
+    @Column(name = "FechaCreacion", nullable = false)
+    private LocalDateTime fechaCreacion;
+
+    @Column(name = "UsuarioCreacion", nullable = false)
+    private String usuarioCreacion;
+
+    @Column(name = "FechaModificacion")
+    private LocalDateTime fechaModificacion;
+
+    @Column(name = "UsuarioModificacion")
+    private String usuarioModificacion;
 }
