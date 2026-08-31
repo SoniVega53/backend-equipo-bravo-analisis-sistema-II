@@ -38,7 +38,7 @@ public class StatusUsuarioService extends BaseService<StatusUsuario, Integer> {
         statusUsuario.setUsuarioCreacion(usuarioActual);
         statusUsuario.setFechaCreacion(LocalDateTime.now());
 
-        return super.crearBase(statusUsuario);
+        return super.crearBasePermisos(statusUsuario);
     }
 
     public StatusUsuario actualizar(
@@ -53,6 +53,6 @@ public class StatusUsuarioService extends BaseService<StatusUsuario, Integer> {
         existente.setUsuarioModificacion(usuarioActual);
         existente.setFechaModificacion(LocalDateTime.now());
 
-        return super.actualizarBase(existente);
+        return super.actualizarBasePermisos(existente);
     }
 }

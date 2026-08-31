@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/status-usuario")
+@RequestMapping("/api/console/status-usuario")
 @Tag(name = "StatusUsuario", description = "Endpoints para CRUD de estatus de usuario")
 public class StatusUsuarioController extends BaseController {
 
@@ -26,7 +26,7 @@ public class StatusUsuarioController extends BaseController {
     @GetMapping
     public ResponseEntity<?> listarTodos() {
         return success(
-                statusUsuarioService.buscarTodos(),
+                statusUsuarioService.buscarTodosPermisos(),
                 SuccessCode.STATUS_USUARIO_GENERAL
         );
     }
@@ -35,7 +35,7 @@ public class StatusUsuarioController extends BaseController {
     public ResponseEntity<?> obtenerPorId(@PathVariable Integer id) {
         try {
             return success(
-                    statusUsuarioService.buscarPorId(id),
+                    statusUsuarioService.buscarPorIdPermisos(id),
                     SuccessCode.STATUS_USUARIO_GENERAL
             );
         } catch (BusinessException e) {

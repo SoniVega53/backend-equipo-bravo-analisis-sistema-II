@@ -50,7 +50,7 @@ public class RoleService extends BaseService<Role, Integer> {
         role.setUsuarioCreacion(usuarioActual);
         role.setFechaCreacion(LocalDateTime.now());
 
-        return super.crearBase(role);
+        return super.crearBasePermisos(role);
     }
 
     public Role actualizar(
@@ -76,6 +76,6 @@ public class RoleService extends BaseService<Role, Integer> {
         existente.setUsuarioModificacion(usuarioActual);
         existente.setFechaModificacion(LocalDateTime.now());
 
-        return super.actualizarBase(existente);
+        return super.actualizarBasePermisos(existente);
     }
 }

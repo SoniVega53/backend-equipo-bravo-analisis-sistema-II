@@ -86,9 +86,10 @@ public abstract class BaseService<T, ID> {
         }
     }
 
-    public void eliminarBasePermisos(ID id) {
+    public String eliminarBasePermisos(ID id) {
         validarBaja();
         eliminarBase(id);
+        return "Eliminado Correctamente";
     }
 
     public List<T> buscarTodosPermisos() {

@@ -428,7 +428,13 @@ public class UsuarioService {
 
             data.setIdSucursal(request.getIdSucursal());
             data.setIdGenero(request.getIdGenero());
+
+            if (data.getIdStatusUsuario() != request.getIdStatusUsuario()){
+                data.setIntentosDeAcceso(0);
+            }
+
             data.setIdStatusUsuario(request.getIdStatusUsuario());
+
             data.setIdRole(request.getIdRole());
 
             data.setUsuarioModificacion(idUsuarioLogg);
