@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-public class EmpresaService extends BaseService<Empresa, Integer> {
+public class EmpresaConsoleService extends BaseService<Empresa, Integer> {
 
     @Autowired
     private EmpresaRepository empresaRepository;

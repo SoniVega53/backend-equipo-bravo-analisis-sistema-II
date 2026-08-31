@@ -4,7 +4,7 @@ import backend_equipo_bravo.analisis_sistema_II.dto.empresa.EmpresaRequest;
 import backend_equipo_bravo.analisis_sistema_II.entity.Empresa;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCode;
-import backend_equipo_bravo.analisis_sistema_II.service.EmpresaService;
+import backend_equipo_bravo.analisis_sistema_II.service.EmpresaConsoleService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,10 +16,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/console/empresa")
 @Tag(name = "Empresa", description = "Endpoints para CRUD empresa")
-public class EmpresaController extends BaseController {
+public class EmpresaConsoleController extends BaseController {
 
     @Autowired
-    private EmpresaService empresaService;
+    private EmpresaConsoleService empresaService;
 
     @GetMapping
     public ResponseEntity<?> listarTodos() {

@@ -4,7 +4,7 @@ import backend_equipo_bravo.analisis_sistema_II.dto.SucursalRequest;
 import backend_equipo_bravo.analisis_sistema_II.entity.Sucursal;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCode;
-import backend_equipo_bravo.analisis_sistema_II.service.SucursalService;
+import backend_equipo_bravo.analisis_sistema_II.service.SucursalConsoleService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,10 +16,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/console/sucursal")
 @Tag(name = "Sucursal", description = "Endpoints para CRUD sucursal")
-public class SucursalController extends BaseController {
+public class SucursalConsoleController extends BaseController {
 
     @Autowired
-    private SucursalService sucursalService;
+    private SucursalConsoleService sucursalService;
 
     @GetMapping
     public ResponseEntity<?> listarTodos() {

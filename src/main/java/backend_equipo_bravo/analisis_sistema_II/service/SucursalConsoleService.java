@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-public class SucursalService extends BaseService<Sucursal, Integer> {
+public class SucursalConsoleService extends BaseService<Sucursal, Integer> {
 
     @Autowired
     private SucursalRepository sucursalRepository;
