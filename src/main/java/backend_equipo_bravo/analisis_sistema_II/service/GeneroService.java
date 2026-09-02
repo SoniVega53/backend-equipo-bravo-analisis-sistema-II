@@ -41,7 +41,7 @@ public class GeneroService extends BaseService<Genero, Integer> {
         genero.setUsuarioCreacion(usuarioActual);
         genero.setFechaCreacion(LocalDateTime.now());
 
-        return super.crearBase(genero);
+        return super.crearBasePermisos(genero);
     }
 
     public Genero actualizar(Integer id, GeneroRequest generoActualizado) {
@@ -56,6 +56,6 @@ public class GeneroService extends BaseService<Genero, Integer> {
         existente.setUsuarioModificacion(usuarioActual);
         existente.setFechaModificacion(LocalDateTime.now());
 
-        return super.actualizarBase(existente);
+        return super.actualizarBasePermisos(existente);
     }
 }

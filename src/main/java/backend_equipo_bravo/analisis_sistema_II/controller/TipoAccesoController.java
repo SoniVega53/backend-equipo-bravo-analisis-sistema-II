@@ -56,7 +56,7 @@ public class TipoAccesoController extends BaseController{
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Integer id) {
         try {
-            service.eliminarBase(id);
+            service.eliminarBasePermisos(id);
             return success("Se elimino Correctamente", SuccessCode.TIPO_ACCESO_DELETED_SUCCESS);
         } catch (BusinessException e) {
             return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/genero")
+@RequestMapping("/api/console/genero")
 @Tag(name = "Genero", description = "Endpoints para CRUD genero")
 public class GeneroController extends BaseController {
     @Autowired
@@ -22,13 +22,17 @@ public class GeneroController extends BaseController {
 
     @GetMapping
     public ResponseEntity<?> listarTodos() {
-        return success(generoService.buscarTodos(), SuccessCode.GENERO_GENERAL);
+        try {
+            return success(generoService.buscarTodosPermisos(), SuccessCode.GENERO_GENERAL);
+        }catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerPorId(@PathVariable Integer id) {
         try {
-            return success(generoService.buscarPorId(id), SuccessCode.GENERO_GENERAL);
+            return success(generoService.buscarPorIdPermisos(id), SuccessCode.GENERO_GENERAL);
         } catch (BusinessException e) {
             return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
         }
@@ -36,10 +40,14 @@ public class GeneroController extends BaseController {
 
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody GeneroRequest genero) {
-        Genero creado = generoService.crear(genero);
+        try{
+            Genero creado = generoService.crear(genero);
 
-        Map<String, Object> data = Map.of("genero", creado);
-        return success(data, SuccessCode.GENERO_SUCCESS);
+            Map<String, Object> data = Map.of("genero", creado);
+            return success(data, SuccessCode.GENERO_SUCCESS);
+        }catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 
     @PutMapping("/{id}")
@@ -56,7 +64,7 @@ public class GeneroController extends BaseController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Integer id) {
         try {
-            generoService.eliminarBase(id);
+            generoService.eliminarBasePermisos(id);
             return success(null, SuccessCode.GENERO_DELETED_SUCCESS);
         } catch (BusinessException e) {
             return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
