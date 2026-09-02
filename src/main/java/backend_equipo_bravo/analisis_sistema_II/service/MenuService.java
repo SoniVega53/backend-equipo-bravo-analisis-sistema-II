@@ -92,6 +92,7 @@ public class MenuService {
                 .id("modulo-".concat(String.valueOf(modulo.getIdModulo().longValue())))
                 .code(modulo.getIdModulo())
                 .label(modulo.getNombre())
+                .order(modulo.getOrdenMenu())
                 .expanded(true)
                 .children(menuChildren)
                 .build();
@@ -111,6 +112,7 @@ public class MenuService {
                 .id("menu-".concat(String.valueOf(menu.getIdMenu().longValue())))
                 .code(menu.getIdMenu())
                 .label(menu.getNombre())
+                .order(menu.getOrdenMenu())
                 .expanded(true)
                 .children(opcionChildren)
                 .build();
@@ -120,6 +122,7 @@ public class MenuService {
         return MenuItemDto.builder()
                 .id("opcion-".concat(String.valueOf(opcion.getIdOpcion().longValue())))
                 .code(opcion.getIdOpcion())
+                .order(opcion.getOrdenMenu())
                 .label(opcion.getNombre())
                 .url(opcion.getPagina())
                 .build();
