@@ -1,4 +1,4 @@
-package backend_equipo_bravo.analisis_sistema_II.dto;
+package backend_equipo_bravo.analisis_sistema_II.dto.opciones;
 
 import lombok.Data;
 

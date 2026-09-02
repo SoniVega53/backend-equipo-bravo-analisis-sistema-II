@@ -1,6 +1,6 @@
 package backend_equipo_bravo.analisis_sistema_II.controller;
 
-import backend_equipo_bravo.analisis_sistema_II.dto.OpcionRequest;
+import backend_equipo_bravo.analisis_sistema_II.dto.opciones.OpcionRequest;
 import backend_equipo_bravo.analisis_sistema_II.entity.Opcion;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCode;
@@ -24,7 +24,7 @@ public class OpcionController extends BaseController {
     @GetMapping
     public ResponseEntity<?> listarTodos() {
         try {
-            return success(opcionService.buscarTodosPermisos(), SuccessCode.OPCION_GENERAL);
+            return success(opcionService.buscarTodosOpciones(), SuccessCode.OPCION_GENERAL);
         } catch (BusinessException e) {
             return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.NOT_FOUND);
         }

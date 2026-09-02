@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -253,15 +254,24 @@ public class UsuarioService {
         Empresa empresa = politicasService.obtenerEmpresaPorSucursal(usuario.getIdSucursal());
         Integer diasCaducidad = empresa.getPasswordCantidadCaducidadDias();
 
-        if (diasCaducidad != null && diasCaducidad > 0 && usuario.getUltimaFechaCambioPassword() != null) {
-            long diasTranscurridos = java.time.temporal.ChronoUnit.DAYS.between(
-                    usuario.getUltimaFechaCambioPassword(),
-                    LocalDateTime.now()
-            );
-            return diasTranscurridos >= diasCaducidad;
+        if (diasCaducidad == null) {
+            return false;
         }
 
-        return false;
+        if (diasCaducidad <= 0) {
+            return true;
+        }
+
+        if (usuario.getUltimaFechaCambioPassword() == null) {
+            return false;
+        }
+
+        long diasTranscurridos = ChronoUnit.DAYS.between(
+                usuario.getUltimaFechaCambioPassword(),
+                LocalDateTime.now()
+        );
+
+        return diasTranscurridos >= diasCaducidad;
     }
 
     public UsuarioPerfilResponse getDataPerfil() {

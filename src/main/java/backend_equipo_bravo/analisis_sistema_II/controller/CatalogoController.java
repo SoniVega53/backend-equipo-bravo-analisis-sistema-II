@@ -53,4 +53,9 @@ public class CatalogoController extends BaseController {
     public ResponseEntity<?> getMenus() {
         return success(catalogoService.getMenus(), SuccessCode.GENERAL);
     }
+
+    @GetMapping("/menus/{idModulo}")
+    public ResponseEntity<?> getMenus(@PathVariable Integer idModulo) {
+        return success(catalogoService.getMenus(idModulo), SuccessCode.GENERAL);
+    }
 }

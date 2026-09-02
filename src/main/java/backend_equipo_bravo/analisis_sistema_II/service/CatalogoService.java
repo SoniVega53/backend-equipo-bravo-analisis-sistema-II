@@ -78,4 +78,10 @@ public class CatalogoService {
                 .map(m -> new SelectOptionDto(m.getIdMenu(), m.getNombre()))
                 .collect(Collectors.toList());
     }
+
+    public List<SelectOptionDto> getMenus(Integer idModulo) {
+        return menuRepository.findByIdModulo(idModulo).stream()
+                .map(m -> new SelectOptionDto(m.getIdMenu(), m.getNombre()))
+                .collect(Collectors.toList());
+    }
 }
