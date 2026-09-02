@@ -1,6 +1,7 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
 import backend_equipo_bravo.analisis_sistema_II.dto.ControlIdOpcion;
+import backend_equipo_bravo.analisis_sistema_II.dto.ControlRolUser;
 import backend_equipo_bravo.analisis_sistema_II.dto.ModuloDto;
 import backend_equipo_bravo.analisis_sistema_II.dto.RoleDto;
 import backend_equipo_bravo.analisis_sistema_II.dto.RoleOption.*;
@@ -103,7 +104,7 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
                 if (item.getAlta() == 0 && item.getBaja() == 0 && item.getCambio() == 0 &&
                         item.getConsultar() == 0 && item.getExportar() == 0 && item.getImprimir() == 0) {
                     roleOpcionRepository.delete(optData.get());
-                    return;
+                    continue;
                 }
 
                 data = optData.get();
@@ -223,5 +224,33 @@ public class RoleOpcionService extends BaseService<RoleOpcion, RoleOpcionId> {
         });
 
         return responseRoles;
+    }
+
+    public void createOpcionPermit(Integer idOpcion,String usuarioActual) {
+
+        Usuario usuario = usuarioRepository.findByIdUsuario(usuarioActual)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+//        if (!usuario.getIdRole().equals(ControlRolUser.Administrador.getId()))
+//            return;
+
+        Optional<RoleOpcion> optData = roleOpcionRepository.findByIdRoleAndIdOpcion(ControlRolUser.Administrador.getId(), idOpcion);
+
+        RoleOpcion data;
+        if (!optData.isPresent()) {
+            data = new RoleOpcion();
+            data.setIdRole(ControlRolUser.Administrador.getId());
+            data.setIdOpcion(idOpcion);
+            data.setAlta(1);
+            data.setBaja(1);
+            data.setCambio(1);
+            data.setConsultar(1);
+            data.setExportar(1);
+            data.setImprimir(1);
+
+            data.setUsuarioCreacion(usuarioActual);
+            data.setFechaCreacion(LocalDateTime.now());
+            super.crearBase(data);
+        }
     }
 }

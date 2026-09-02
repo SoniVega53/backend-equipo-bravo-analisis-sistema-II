@@ -38,7 +38,7 @@ public class TipoAccesoService extends BaseService<TipoAcceso, Integer> {
                 .usuarioCreacion(obtenerUsuarioAutenticado())
                 .build();
 
-        return convertirADto(super.crearBase(entidad));
+        return convertirADto(super.crearBasePermisos(entidad));
     }
 
     public TipoAccesoDto actualizar(Integer id, TipoAccesoDto dto) {
@@ -48,7 +48,7 @@ public class TipoAccesoService extends BaseService<TipoAcceso, Integer> {
         entidad.setFechaModificacion(LocalDateTime.now());
         entidad.setUsuarioModificacion(obtenerUsuarioAutenticado());
 
-        return convertirADto(super.actualizarBase(entidad));
+        return convertirADto(super.actualizarBasePermisos(entidad));
     }
 
 

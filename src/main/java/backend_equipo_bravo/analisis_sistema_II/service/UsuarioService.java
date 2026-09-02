@@ -1,34 +1,34 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioPerfilRequest;
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioPerfilResponse;
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdatePasswordRequest;
-import backend_equipo_bravo.analisis_sistema_II.dto.usuario.UsuarioUpdateRequest;
-import backend_equipo_bravo.analisis_sistema_II.entity.Empresa;
-import backend_equipo_bravo.analisis_sistema_II.entity.Genero;
-import backend_equipo_bravo.analisis_sistema_II.entity.Sucursal;
-import backend_equipo_bravo.analisis_sistema_II.entity.Usuario;
+import backend_equipo_bravo.analisis_sistema_II.dto.ControlIdOpcion;
+import backend_equipo_bravo.analisis_sistema_II.dto.usuario.*;
+import backend_equipo_bravo.analisis_sistema_II.entity.*;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.EmpresaError;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.GeneralError;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.SucursalError;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError;
-import backend_equipo_bravo.analisis_sistema_II.repository.EmpresaRepository;
-import backend_equipo_bravo.analisis_sistema_II.repository.GeneroRepository;
-import backend_equipo_bravo.analisis_sistema_II.repository.SucursalRepository;
-import backend_equipo_bravo.analisis_sistema_II.repository.UsuarioRepository;
+import backend_equipo_bravo.analisis_sistema_II.repository.*;
 import backend_equipo_bravo.analisis_sistema_II.utils.FechaUtil;
 import backend_equipo_bravo.analisis_sistema_II.utils.FormatoFecha;
+import jakarta.transaction.Transactional;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UsuarioService {
+    private final String UPLOAD_DIR = "uploads/perfiles/";
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -50,6 +50,114 @@ public class UsuarioService {
 
     @Autowired
     private AuditoriaService auditoriaService;
+
+    @Autowired
+    private RoleOpcionRepository roleOpcionRepository;
+
+    public void eliminarUsuario(String idUsuario) {
+        String idUsuarioLogg = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        if (idUsuarioLogg.equalsIgnoreCase(idUsuario)) {
+            throw new BusinessException(
+                    GeneralError.ERROR_SERVICE
+            );
+        }
+
+        Usuario ejecutor = usuarioRepository.findByIdUsuario(idUsuarioLogg)
+                .orElseThrow(() -> new BusinessException(
+                        UsuarioError.AUTH_USER_NOT_FOUND
+                ));
+
+        RoleOpcion permisoRol = roleOpcionRepository
+                .findByIdRoleAndIdOpcion(
+                        ejecutor.getIdRole(),
+                        ControlIdOpcion.USUARIOS.getId()
+                )
+                .orElse(new RoleOpcion());
+
+        if (permisoRol.getBaja() == 0) {
+            throw new BusinessException(
+                    UsuarioError.AUTH_NO_AUTHORIZED_DELETE
+            );
+        }
+        Usuario usuario = usuarioRepository.findByIdUsuario(idUsuario)
+                .orElseThrow(() -> new BusinessException(
+                        UsuarioError.AUTH_USER_NOT_FOUND
+                ));
+        try {
+            usuarioRepository.delete(usuario);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(GeneralError.ERROR_DEPENDENCY);
+        } catch (Exception e) {
+            throw new BusinessException(GeneralError.ERROR_SERVICE);
+        }
+    }
+
+    public List<UsuarioDTO> buscarTodos() {
+
+        String idUsuarioLogg = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        Usuario ejecutor = usuarioRepository.findByIdUsuario(idUsuarioLogg)
+                .orElseThrow(() -> new BusinessException(
+                        UsuarioError.AUTH_USER_NOT_FOUND
+                ));
+
+        RoleOpcion permisoRol = roleOpcionRepository
+                .findByIdRoleAndIdOpcion(
+                        ejecutor.getIdRole(),
+                        ControlIdOpcion.USUARIOS.getId()
+                )
+                .orElse(new RoleOpcion());
+
+        if (permisoRol.getConsultar() == 0) {
+            throw new BusinessException(
+                    UsuarioError.AUTH_NO_AUTHORIZED_VIEW
+            );
+        }
+
+        List<Usuario> listado = usuarioRepository.findAll();
+
+        return listado.stream()
+                .filter(usuario -> !usuario.getIdUsuario().equals(idUsuarioLogg))
+                .map(usuario -> {
+                    UsuarioDTO dto = new UsuarioDTO();
+
+                    Sucursal sucursal = sucursalRepository.findById(usuario.getIdSucursal())
+                            .orElseThrow(() -> new BusinessException(SucursalError.SUCURSAL_NOT_FOUND));
+
+                    dto.setIdUsuario(usuario.getIdUsuario());
+                    dto.setNombre(usuario.getNombre());
+                    dto.setApellido(usuario.getApellido());
+                    dto.setFechaNacimiento(usuario.getFechaNacimiento());
+                    dto.setIdStatusUsuario(usuario.getIdStatusUsuario());
+                    dto.setIdGenero(usuario.getIdGenero());
+                    dto.setIntentosDeAcceso(usuario.getIntentosDeAcceso());
+                    dto.setSesionActual(usuario.getSesionActual());
+                    dto.setCorreoElectronico(usuario.getCorreoElectronico());
+                    dto.setRequiereCambiarPassword(usuario.getRequiereCambiarPassword());
+                    dto.setFotografia(usuario.getFotografia());
+                    dto.setTelefonoMovil(usuario.getTelefonoMovil());
+                    dto.setIdSucursal(usuario.getIdSucursal());
+                    dto.setIdEmpresa(sucursal.getIdEmpresa());
+                    dto.setPregunta(usuario.getPregunta());
+                    dto.setRespuesta(usuario.getRespuesta());
+                    dto.setIdRole(usuario.getIdRole());
+
+                    dto.setFechaCreacion(usuario.getFechaCreacion());
+                    dto.setFechaModificacion(usuario.getFechaModificacion());
+                    dto.setUsuarioCreacion(usuario.getUsuarioCreacion());
+                    dto.setUsuarioModificacion(usuario.getUsuarioModificacion());
+
+                    return dto;
+                })
+                .toList();
+    }
 
     public Usuario actualizarUsuario(String idUsuarioActualizar, UsuarioUpdateRequest request) {
         String idUsuarioEjecutor = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -109,6 +217,11 @@ public class UsuarioService {
         if (passwordEncoder.matches(password, usuario.getPassword())) {
             throw new BusinessException(UsuarioError.AUTH_PASSWORD_EQUALS);
         }
+
+        Sucursal sucursal = sucursalRepository.findById(usuario.getIdSucursal())
+                .orElseThrow(() -> new BusinessException(SucursalError.SUCURSAL_NOT_FOUND));
+        politicasService.validarPasswordEstricto(sucursal.getIdEmpresa(), password);
+
         usuario.setPassword(passwordEncoder.encode(password));
         usuario.setUltimaFechaCambioPassword(LocalDateTime.now());
         usuario.setRequiereCambiarPassword(0);
@@ -127,8 +240,8 @@ public class UsuarioService {
         if ((usuario.getUltimaFechaCambioPassword() == null ||
                 (usuario.getRequiereCambiarPassword() == null || usuario.getRequiereCambiarPassword() == 1)) ||
                 isReno) {
-            usuario.setRequiereCambiarPassword(isReno ? 2:1);
-        }else{
+            usuario.setRequiereCambiarPassword(isReno ? 2 : 1);
+        } else {
             usuario.setRequiereCambiarPassword(0);
         }
 
@@ -137,19 +250,28 @@ public class UsuarioService {
         return usuario.getRequiereCambiarPassword() != null ? usuario.getRequiereCambiarPassword() : 1;
     }
 
-    private boolean validarRenovacionPassword(Usuario usuario){
+    private boolean validarRenovacionPassword(Usuario usuario) {
         Empresa empresa = politicasService.obtenerEmpresaPorSucursal(usuario.getIdSucursal());
         Integer diasCaducidad = empresa.getPasswordCantidadCaducidadDias();
 
-        if (diasCaducidad != null && diasCaducidad > 0 && usuario.getUltimaFechaCambioPassword() != null) {
-            long diasTranscurridos = java.time.temporal.ChronoUnit.DAYS.between(
-                    usuario.getUltimaFechaCambioPassword(),
-                    LocalDateTime.now()
-            );
-            return diasTranscurridos >= diasCaducidad;
+        if (diasCaducidad == null) {
+            return false;
         }
 
-        return false;
+        if (diasCaducidad <= 0) {
+            return true;
+        }
+
+        if (usuario.getUltimaFechaCambioPassword() == null) {
+            return false;
+        }
+
+        long diasTranscurridos = ChronoUnit.DAYS.between(
+                usuario.getUltimaFechaCambioPassword(),
+                LocalDateTime.now()
+        );
+
+        return diasTranscurridos >= diasCaducidad;
     }
 
     public UsuarioPerfilResponse getDataPerfil() {
@@ -166,6 +288,7 @@ public class UsuarioService {
 
         UsuarioPerfilResponse response = new UsuarioPerfilResponse();
 
+        response.setIdUsuario(usuario.getIdUsuario());
         response.setNombre(usuario.getNombre());
         response.setApellido(usuario.getApellido());
         response.setFechaNacimiento(usuario.getFechaNacimiento());
@@ -205,7 +328,204 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    public Usuario cambioPassword(String passwordOld, String passwordNew,String ip, String userAgent) {
+
+    public String getPreguntaUsuario(String idUsuarioLog, String ip, String userAgent) {
+
+        Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLog)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        if (usuario.getIdStatusUsuario() != 1) {
+            boolean isInactive = usuario.getIdStatusUsuario() == 3;
+
+            auditoriaService.registrarIntento(idUsuarioLog, isInactive ? 4 : 2, ip, userAgent, null);
+            throw new BusinessException(isInactive ? UsuarioError.AUTH_USER_INACTIVE : UsuarioError.AUTH_USER_BLOCKED);
+        }
+
+        return usuario.getPregunta();
+    }
+
+    public boolean validarRespuestaUsuario(String idUsuarioLog, String respuesta, String ip, String userAgent) {
+        Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLog)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        if (usuario.getIdStatusUsuario() != 1) {
+            boolean isInactive = usuario.getIdStatusUsuario() == 3;
+
+            auditoriaService.registrarIntento(idUsuarioLog, isInactive ? 4 : 2, ip, userAgent, null);
+            throw new BusinessException(isInactive ? UsuarioError.AUTH_USER_INACTIVE : UsuarioError.AUTH_USER_BLOCKED);
+        }
+
+        if (!usuario.getRespuesta().equals(respuesta)) {
+
+            int intentosActuales = usuario.getIntentosDeAcceso() != null ? usuario.getIntentosDeAcceso() : 0;
+            intentosActuales++;
+            usuario.setIntentosDeAcceso(intentosActuales);
+
+            int intentosPermitidos = politicasService.obtenerIntentosPermitidosPorSucursal(usuario.getIdSucursal());
+
+            if (intentosActuales >= intentosPermitidos) {
+                usuario.setIdStatusUsuario(2);
+                usuario.setSesionActual(null);
+                usuarioRepository.save(usuario);
+                auditoriaService.registrarIntento(idUsuarioLog, 3, ip, userAgent, null);
+                throw new BusinessException(UsuarioError.AUTH_USER_BLOCKED_ATTEMPTS);
+            } else {
+                usuarioRepository.save(usuario);
+                auditoriaService.registrarIntento(idUsuarioLog, 2, ip, userAgent, null);
+                throw new BusinessException(UsuarioError.AUTH_INVALID_ANSWER, intentosActuales, intentosPermitidos);
+            }
+        }
+
+        usuario.setIntentosDeAcceso(0);
+        usuarioRepository.save(usuario);
+
+        return true;
+    }
+
+    public Usuario cambioPasswordRecuperacion(String idUsuarioLog, String password) {
+        Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLog)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        if (password == null || password.isEmpty()) {
+            throw new BusinessException(UsuarioError.AUTH_PASSWORD_EMPTY);
+        }
+
+        Sucursal sucursal = sucursalRepository.findById(usuario.getIdSucursal())
+                .orElseThrow(() -> new BusinessException(SucursalError.SUCURSAL_NOT_FOUND));
+
+        politicasService.validarPasswordEstricto(sucursal.getIdEmpresa(), password);
+
+        usuario.setPassword(passwordEncoder.encode(password));
+        usuario.setUltimaFechaCambioPassword(LocalDateTime.now());
+        usuario.setRequiereCambiarPassword(0);
+        usuario.setFechaModificacion(LocalDateTime.now());
+        usuario.setUsuarioModificacion(usuario.getIdUsuario());
+
+        return usuarioRepository.save(usuario);
+    }
+
+
+    public Usuario consoleUpdateAndSaveUsuario(UsuarioSaveRequest request) {
+        String idUsuarioLogg = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Usuario ejecutor = usuarioRepository.findByIdUsuario(idUsuarioLogg)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        RoleOpcion permisoRol = roleOpcionRepository.findByIdRoleAndIdOpcion(ejecutor.getIdRole(), ControlIdOpcion.USUARIOS.getId())
+                .orElse(new RoleOpcion());
+
+        Optional<Usuario> optUsuario = usuarioRepository.findByIdUsuario(request.getIdUsuario());
+
+        Usuario data;
+        if (optUsuario.isPresent()) {
+            if (permisoRol.getCambio() == 0) {
+                throw new BusinessException(UsuarioError.AUTH_NO_AUTHORIZED_MODIFY);
+            }
+
+            if (!request.getIsUpdate()) {
+                throw new BusinessException(UsuarioError.AUTH_USER_EXIST);
+            }
+
+            data = optUsuario.get();
+            data.setNombre(request.getNombre());
+            data.setApellido(request.getApellido());
+            data.setFechaNacimiento(request.getFechaNacimiento());
+            data.setCorreoElectronico(request.getCorreoElectronico());
+            data.setTelefonoMovil(request.getTelefonoMovil());
+            data.setPregunta(request.getPregunta());
+            data.setRespuesta(request.getRespuesta());
+            data.setRequiereCambiarPassword(request.getRequiereCambiarPassword());
+
+            data.setIdSucursal(request.getIdSucursal());
+            data.setIdGenero(request.getIdGenero());
+
+            if (data.getIdStatusUsuario() != request.getIdStatusUsuario()){
+                data.setIntentosDeAcceso(0);
+            }
+
+            data.setIdStatusUsuario(request.getIdStatusUsuario());
+
+            data.setIdRole(request.getIdRole());
+
+            data.setUsuarioModificacion(idUsuarioLogg);
+            data.setFechaModificacion(LocalDateTime.now());
+
+            return usuarioRepository.save(data);
+        } else {
+            if (permisoRol.getAlta() == 0) {
+                throw new BusinessException(UsuarioError.AUTH_NO_AUTHORIZED_ADD);
+            }
+            if (request.getPassword().isEmpty()) {
+                throw new BusinessException(UsuarioError.AUTH_PASSWORD_EMPTY);
+            }
+
+            Sucursal sucursal = sucursalRepository.findById(request.getIdSucursal())
+                    .orElseThrow(() -> new BusinessException(SucursalError.SUCURSAL_NOT_FOUND));
+
+            politicasService.validarPasswordEstricto(sucursal.getIdEmpresa(), request.getPassword());
+
+            data = new Usuario();
+            data.setIdUsuario(request.getIdUsuario());
+            data.setNombre(request.getNombre());
+            data.setApellido(request.getApellido());
+            data.setFechaNacimiento(request.getFechaNacimiento());
+            data.setCorreoElectronico(request.getCorreoElectronico());
+            data.setTelefonoMovil(request.getTelefonoMovil());
+            data.setPassword(passwordEncoder.encode(request.getPassword()));
+            data.setPregunta(request.getPregunta());
+            data.setRespuesta(request.getRespuesta());
+            data.setRequiereCambiarPassword(1);
+            data.setIntentosDeAcceso(0);
+
+            data.setIdSucursal(request.getIdSucursal());
+            data.setIdGenero(request.getIdGenero());
+            data.setIdStatusUsuario(request.getIdStatusUsuario());
+            data.setIdRole(request.getIdRole());
+
+            data.setUsuarioCreacion(idUsuarioLogg);
+            data.setFechaCreacion(LocalDateTime.now());
+
+            return usuarioRepository.save(data);
+        }
+    }
+
+
+    @Transactional
+    public String actualizarFotografia(String idUsuario, MultipartFile file) throws BusinessException {
+        try {
+            Usuario usuario = usuarioRepository.findByIdUsuario(idUsuario)
+                    .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+            byte[] bytesImagen = file.getBytes();
+            usuario.setFotografia(bytesImagen);
+            usuarioRepository.save(usuario);
+
+            String base64Image = Base64.getEncoder().encodeToString(bytesImagen);
+            String mimeType = file.getContentType();
+            return "data:" + mimeType + ";base64," + base64Image;
+
+        } catch (IOException e) {
+            throw new BusinessException(UsuarioError.FILE_ERROR);
+        }
+    }
+
+    public String obtenerFotografiaBase64() throws BusinessException {
+        String idUsuarioLogg = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLogg)
+                .orElseThrow(() -> new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+
+        if (usuario.getFotografia() == null || usuario.getFotografia().length == 0) {
+            return null;
+        }
+
+        String base64Image = Base64.getEncoder().encodeToString(usuario.getFotografia());
+
+        return "data:image/jpeg;base64," + base64Image;
+    }
+
+
+    public Usuario cambioPassword(String passwordOld, String passwordNew, String ip, String userAgent) {
         String idUsuarioLog = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Usuario usuario = usuarioRepository.findByIdUsuario(idUsuarioLog)
@@ -246,6 +566,179 @@ public class UsuarioService {
         usuario.setUltimaFechaCambioPassword(LocalDateTime.now());
         usuario.setRequiereCambiarPassword(0);
         usuario.setIntentosDeAcceso(0);
+
+        return usuarioRepository.save(usuario);
+    }
+
+    public UsuarioPreguntaResponse obtenerPregunta(
+            String idUsuario
+    ) {
+
+        Usuario usuario =
+                usuarioRepository.findByIdUsuario(idUsuario)
+                        .orElseThrow(() ->
+                                new BusinessException(
+                                        UsuarioError.AUTH_USER_NOT_FOUND
+                                ));
+
+        UsuarioPreguntaResponse response =
+                new UsuarioPreguntaResponse();
+
+        response.setPregunta(usuario.getPregunta());
+
+        return response;
+    }
+
+    public boolean validarRespuesta(
+            ValidarPreguntasRequest request
+    ) {
+
+        if (
+                request.getIdUsuario() == null ||
+                        request.getRespuesta() == null
+        ) {
+            return false;
+        }
+
+        Usuario usuario =
+                usuarioRepository.findByIdUsuario(
+                        request.getIdUsuario().trim()
+                ).orElse(null);
+
+        if (
+                usuario == null ||
+                        usuario.getRespuesta() == null
+        ) {
+            return false;
+        }
+
+        String respuestaIngresada =
+                request.getRespuesta()
+                        .trim()
+                        .toLowerCase();
+
+        String respuestaGuardada =
+                usuario.getRespuesta()
+                        .trim()
+                        .toLowerCase();
+
+        return respuestaGuardada.equals(
+                respuestaIngresada
+        );
+    }
+
+    public void recuperarPassword(
+            RecuperarPasswordUpdateRequest request
+    ) {
+
+        if (
+                request.getIdUsuario() == null ||
+                        request.getRespuesta() == null
+        ) {
+            throw new BusinessException(
+                    UsuarioError.AUTH_USER_NOT_FOUND
+            );
+        }
+
+        Usuario usuario =
+                usuarioRepository.findByIdUsuario(
+                        request.getIdUsuario().trim()
+                ).orElseThrow(() ->
+                        new BusinessException(
+                                UsuarioError.AUTH_USER_NOT_FOUND
+                        ));
+
+        if (usuario.getRespuesta() == null) {
+            throw new BusinessException(
+                    UsuarioError.AUTH_USER_NOT_FOUND
+            );
+        }
+
+        String respuestaIngresada =
+                request.getRespuesta()
+                        .trim()
+                        .toLowerCase();
+
+        String respuestaGuardada =
+                usuario.getRespuesta()
+                        .trim()
+                        .toLowerCase();
+
+        if (!respuestaGuardada.equals(respuestaIngresada)) {
+            throw new BusinessException(
+                    UsuarioError.AUTH_USER_NOT_FOUND
+            );
+        }
+
+        if (
+                request.getPassword() == null ||
+                        request.getPassword().isEmpty()
+        ) {
+            throw new BusinessException(
+                    UsuarioError.AUTH_PASSWORD_EMPTY
+            );
+        }
+
+        usuario.setPassword(
+                passwordEncoder.encode(
+                        request.getPassword()
+                )
+        );
+
+        usuario.setUltimaFechaCambioPassword(
+                LocalDateTime.now()
+        );
+
+        usuario.setRequiereCambiarPassword(0);
+        usuario.setIntentosDeAcceso(0);
+
+        usuarioRepository.save(usuario);
+    }
+
+
+    public Usuario buscarUsuario(String idUsuario) {
+
+        return usuarioRepository.findByIdUsuario(idUsuario)
+                .orElseThrow(() ->
+                        new BusinessException(UsuarioError.AUTH_USER_NOT_FOUND));
+    }
+
+    public Usuario crearUsuario(UsuarioCreateRequest request) {
+
+        String usuarioActual =
+                SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (usuarioRepository.findByIdUsuario(request.getIdUsuario()).isPresent()) {
+            throw new BusinessException(UsuarioError.AUTH_UNAUTHORIZED);
+        }
+
+        Usuario usuario = new Usuario();
+
+        usuario.setIdUsuario(request.getIdUsuario());
+        usuario.setNombre(request.getNombre());
+        usuario.setApellido(request.getApellido());
+        usuario.setFechaNacimiento(request.getFechaNacimiento());
+        usuario.setCorreoElectronico(request.getCorreoElectronico());
+        usuario.setTelefonoMovil(request.getTelefonoMovil());
+
+        usuario.setIdGenero(request.getIdGenero());
+        usuario.setIdRole(request.getIdRole());
+        usuario.setIdStatusUsuario(request.getIdStatusUsuario());
+        usuario.setIdSucursal(request.getIdSucursal());
+
+        usuario.setPassword(
+                passwordEncoder.encode(request.getPassword())
+        );
+
+        usuario.setPregunta(request.getPregunta());
+        usuario.setRespuesta(request.getRespuesta());
+
+        usuario.setIntentosDeAcceso(0);
+        usuario.setRequiereCambiarPassword(1);
+        usuario.setSesionActual(null);
+
+        usuario.setFechaCreacion(LocalDateTime.now());
+        usuario.setUsuarioCreacion(usuarioActual);
 
         return usuarioRepository.save(usuario);
     }

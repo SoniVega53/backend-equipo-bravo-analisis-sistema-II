@@ -2,6 +2,7 @@ package backend_equipo_bravo.analisis_sistema_II.exception.successCode;
 
 public enum SuccessCode {
 
+    GENERAL(200, "GENERAL", "Acción exitosa."),
     AUTH_LOGIN_SUCCESS(200, "AUTH_LOGIN_SUCCESS", "Autenticación exitosa."),
     AUTH_PERFIL_SUCCESS(200, "AUTH_PERFIL_SUCCESS", "Informacion exitosa."),
     USER_CREATED_SUCCESS(201, "USER_CREATED_SUCCESS", "El usuario se creó correctamente."),
@@ -17,6 +18,39 @@ public enum SuccessCode {
     GENERO_GENERAL(200, "GENERAL_SUCCESS", "Consulta Exitosa."),
     GENERO_UPDATED_SUCCESS(200, "GENERAL_SUCCESS", "Genero actualizado Correctamente."),
     GENERO_DELETED_SUCCESS(200, "GENERAL_SUCCESS", "Genero eliminado Correctamente."),
+
+    EMPRESA_SUCCESS(200, "EMPRESA_SUCCESS", "Empresa creada correctamente."),
+    EMPRESA_GENERAL(200, "EMPRESA_GENERAL", "Consulta exitosa."),
+    EMPRESA_UPDATED_SUCCESS(200, "EMPRESA_UPDATED_SUCCESS", "Empresa actualizada correctamente."),
+    EMPRESA_DELETED_SUCCESS(200, "EMPRESA_DELETED_SUCCESS", "Empresa eliminada correctamente."),
+
+    SUCURSAL_SUCCESS(200, "SUCURSAL_SUCCESS", "Sucursal creada correctamente."),
+    SUCURSAL_GENERAL(200, "SUCURSAL_GENERAL", "Consulta exitosa."),
+    SUCURSAL_UPDATED_SUCCESS(200, "SUCURSAL_UPDATED_SUCCESS", "Sucursal actualizada correctamente."),
+
+    STATUS_USUARIO_SUCCESS(200, "STATUS_USUARIO_SUCCESS", "Estatus de usuario creado correctamente."),
+    STATUS_USUARIO_GENERAL(200, "STATUS_USUARIO_GENERAL", "Consulta exitosa."),
+    STATUS_USUARIO_UPDATED_SUCCESS(200, "STATUS_USUARIO_UPDATED_SUCCESS", "Estatus de usuario actualizado correctamente."),
+    STATUS_USUARIO_DELETED_SUCCESS(200, "STATUS_USUARIO_DELETED_SUCCESS", "Estatus de usuario eliminado correctamente."),
+
+    ROLE_GENERAL(200, "ROLE_GENERAL", "Operación de rol realizada con éxito."),
+    ROLE_SUCCESS(201, "ROLE_SUCCESS", "Rol creado exitosamente."),
+    ROLE_UPDATED_SUCCESS(200, "ROLE_UPDATED_SUCCESS", "Rol actualizado exitosamente."),
+    ROLE_DELETED_SUCCESS(200, "ROLE_DELETED_SUCCESS", "Rol eliminado exitosamente."),
+
+    MODULO_GENERAL(200, "MODULO_GENERAL", "Operación de módulo realizada con éxito."),
+    MODULO_SUCCESS(201, "MODULO_SUCCESS", "Módulo creado exitosamente."),
+    MODULO_UPDATED_SUCCESS(200, "MODULO_UPDATED_SUCCESS", "Módulo actualizado exitosamente."),
+    MODULO_DELETED_SUCCESS(200, "MODULO_DELETED_SUCCESS", "Módulo eliminado exitosamente."),
+
+    MENU_SUCCESS(201, "MENU_SUCCESS", "Menú creado exitosamente."),
+    MENU_UPDATED_SUCCESS(200, "MENU_UPDATED_SUCCESS", "Menú actualizado exitosamente."),
+    MENU_DELETED_SUCCESS(200, "MENU_DELETED_SUCCESS", "Menú eliminado exitosamente."),
+
+    OPCION_GENERAL(200, "OPCION_GENERAL", "Operación de opción realizada con éxito."),
+    OPCION_SUCCESS(201, "OPCION_SUCCESS", "Opción creada exitosamente."),
+    OPCION_UPDATED_SUCCESS(200, "OPCION_UPDATED_SUCCESS", "Opción actualizada exitosamente."),
+    OPCION_DELETED_SUCCESS(200, "OPCION_DELETED_SUCCESS", "Opción eliminada exitosamente."),
 
     TIPO_ACCESO_SUCCESS(200, "TIPO_ACCESO_SUCCESS", "Tipo de acceso creado Correctamente."),
     TIPO_ACCESO_GENERAL(200, "TIPO_ACCESO_GENERAL", "Consulta Exitosa."),
