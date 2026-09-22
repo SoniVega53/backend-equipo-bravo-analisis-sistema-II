@@ -165,7 +165,13 @@ public class CatalogoService {
 
     public List<SelectOptionDto> getEmpleados() {
         return empleadoRepository.findAll().stream()
-                .map(e -> new SelectOptionDto(e.getIdEmpleado(), "Empleado ID: " + e.getIdEmpleado()))
+                .map(e -> {
+                    String nombreCompleto = personaRepository.findById(e.getIdPersona())
+                            .map(p -> p.getNombre() + " " + p.getApellido())
+                            .orElse("Empleado ID: " + e.getIdEmpleado());
+
+                    return new SelectOptionDto(e.getIdEmpleado(), nombreCompleto);
+                })
                 .collect(Collectors.toList());
     }
 
