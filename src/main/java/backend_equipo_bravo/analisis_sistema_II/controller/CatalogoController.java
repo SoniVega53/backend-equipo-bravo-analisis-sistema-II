@@ -58,4 +58,54 @@ public class CatalogoController extends BaseController {
     public ResponseEntity<?> getMenus(@PathVariable Integer idModulo) {
         return success(catalogoService.getMenus(idModulo), SuccessCode.GENERAL);
     }
+
+    @GetMapping("/estados-civiles")
+    public ResponseEntity<?> getEstadosCiviles() {
+        return success(catalogoService.getEstadosCiviles(), SuccessCode.GENERAL);
+    }
+
+    @GetMapping("/status-empleados")
+    public ResponseEntity<?> getStatusEmpleados() {
+        return success(catalogoService.getStatusEmpleados(), SuccessCode.GENERAL);
+    }
+
+    @GetMapping("/tipos-documentos")
+    public ResponseEntity<?> getTiposDocumentos() {
+        return success(catalogoService.getTiposDocumentos(), SuccessCode.GENERAL);
+    }
+
+    @GetMapping("/departamentos")
+    public ResponseEntity<?> getDepartamentos() {
+        return success(catalogoService.getDepartamentos(), SuccessCode.GENERAL);
+    }
+
+    @GetMapping("/puestos")
+    public ResponseEntity<?> getPuestos() {
+        return success(catalogoService.getPuestos(), SuccessCode.GENERAL);
+    }
+
+    @GetMapping("/puestos/departamento/{idDepartamento}")
+    public ResponseEntity<?> getPuestosDepartamento(@PathVariable Integer idDepartamento) {
+        return success(catalogoService.getPuestosDepartamento(idDepartamento), SuccessCode.GENERAL);
+    }
+
+    @GetMapping("/personas")
+    public ResponseEntity<?> getPersonas() {
+        return success(catalogoService.getPersonas(), SuccessCode.GENERAL);
+    }
+
+    @GetMapping("/bancos")
+    public ResponseEntity<?> getBancos() {
+        return success(catalogoService.getBancos(), SuccessCode.GENERAL);
+    }
+
+    @GetMapping("/empleados")
+    public ResponseEntity<?> getEmpleados() {
+        return success(catalogoService.getEmpleados(), SuccessCode.GENERAL);
+    }
+
+    @GetMapping("/periodos-planilla")
+    public ResponseEntity<?> getPeriodosPlanilla() {
+        return success(catalogoService.getPeriodosPlanilla(), SuccessCode.GENERAL);
+    }
 }

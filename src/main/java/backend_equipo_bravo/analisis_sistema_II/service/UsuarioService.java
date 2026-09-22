@@ -211,7 +211,7 @@ public class UsuarioService {
             throw new BusinessException(UsuarioError.AUTH_PASSWORD_EMPTY);
         }
 
-        if (usuario.getRequiereCambiarPassword() != 1) {
+        if (usuario.getRequiereCambiarPassword() < 1) {
             throw new BusinessException(UsuarioError.AUTH_NOT_CHANGE);
         }
         if (passwordEncoder.matches(password, usuario.getPassword())) {

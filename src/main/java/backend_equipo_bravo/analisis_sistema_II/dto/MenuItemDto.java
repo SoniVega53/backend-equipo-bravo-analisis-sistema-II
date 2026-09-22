@@ -16,6 +16,7 @@ public class MenuItemDto {
     private String id;
 
     private Integer code;
+    private Integer order;
 
     private String label;
 
