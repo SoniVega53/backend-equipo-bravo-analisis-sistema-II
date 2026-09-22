@@ -10,7 +10,24 @@ public enum ControlIdOpcion {
     MENUS(7, "Menu"),
     OPCIONES(8, "Opcion"),
     USUARIOS(9, "Usuario"),
-    ASIG_OPCIONES(10, "RoleOpcion");
+    ASIG_OPCIONES(10, "RoleOpcion"),
+
+    ESTADO_CIVIL(11, "EstadoCivil"),
+    STATUS_EMPLEADO(12, "StatusEmpleado"),
+    FLUJO_STATUS_EMPLEADO(13, "FlujoStatusEmpleado"),
+    TIPO_DOCUMENTO(14, "TipoDocumento"),
+    DEPARTAMENTO(15, "Departamento"),
+    PUESTO(16, "Puesto"),
+    PERSONA(17, "Persona"),
+    DOCUMENTO_PERSONA(18, "DocumentoPersona"),
+    BANCO(19, "Banco"),
+    EMPLEADO(20, "Empleado"),
+    CUENTA_BANCARIA_EMPLEADO(21, "CuentaBancariaEmpleado"),
+    INASISTENCIAS(22, "Inasistencia"),
+    CALCULO_PLANILLA(23, "CalculoPlanilla"),
+    REPORTE_PLANILLA(24, "ReportePlanilla"),
+    BOLETA_PAGO(25, "BoletaPago"),
+    LIQUIDACION(26, "Liquidacion");
 
     private final int id;
     private final String entityName;

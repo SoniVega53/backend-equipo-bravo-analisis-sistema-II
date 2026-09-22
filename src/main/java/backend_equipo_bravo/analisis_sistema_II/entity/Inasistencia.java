@@ -3,6 +3,7 @@ package backend_equipo_bravo.analisis_sistema_II.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -19,16 +20,16 @@ public class Inasistencia {
     private Integer idEmpleado;
 
     @Column(name = "fechainicial")
-    private LocalDateTime fechaInicial;
+    private LocalDate fechaInicial;
 
     @Column(name = "fechafinal")
-    private LocalDateTime fechaFinal;
+    private LocalDate fechaFinal;
 
     @Column(name = "motivoinasistencia")
     private String motivoInasistencia;
 
     @Column(name = "fechaprocesado")
-    private LocalDateTime fechaProcesado;
+    private LocalDate fechaProcesado;
 
     @Column(name = "fechacreacion")
     private LocalDateTime fechaCreacion;
