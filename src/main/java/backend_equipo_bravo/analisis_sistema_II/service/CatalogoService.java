@@ -177,7 +177,9 @@ public class CatalogoService {
 
     public List<SelectOptionDto> getPeriodosPlanilla() {
         return periodoPlanillaRepository.findAll().stream()
-                .map(p -> new SelectOptionDto(p.getAnio(), "Año: " + p.getAnio() + " - Mes: " + p.getMes()))
+                .map(p ->
+                        new SelectOptionDto(String.valueOf(p.getAnio()).concat("-").concat(String.valueOf(p.getMes())),
+                                "Año: " + p.getAnio() + " - Mes: " + p.getMes()))
                 .collect(Collectors.toList());
     }
 }

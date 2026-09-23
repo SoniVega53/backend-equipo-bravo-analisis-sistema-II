@@ -58,7 +58,7 @@ public class InasistenciaService extends BaseService<Inasistencia, Integer> {
 
     @Transactional
     public InasistenciaResponseDto crearInasistencia(InasistenciaRequestDto request) {
-        validarRangoFechas(request);
+        validarRangoFechas(request,null);
 
         Empleado empleado = empleadoRepository.findById(request.getIdEmpleado())
                 .orElseThrow(() -> new BusinessException(GeneralError.ERROR_SERVICE));
@@ -85,7 +85,7 @@ public class InasistenciaService extends BaseService<Inasistencia, Integer> {
             throw new BusinessException(GeneralError.ERROR_SERVICE);
         }
 
-        validarRangoFechas(request);
+        validarRangoFechas(request,id);
 
         inasistencia.setFechaInicial(request.getFechaInicio());
         inasistencia.setFechaFinal(request.getFechaFin());
@@ -103,16 +103,40 @@ public class InasistenciaService extends BaseService<Inasistencia, Integer> {
         Inasistencia inasistencia = buscarPorId(id);
 
         if (inasistencia.getFechaProcesado() != null) {
+            throw new BusinessException(GeneralError.INASISTENCIA_PROCESS);
+        }
+
+        return eliminarBasePermisos(id);
+    }
+
+    private void validarRangoFechas(InasistenciaRequestDto request, Integer idInasistenciaActual) {
+        if (request.getFechaInicio() == null || request.getFechaFin() == null) {
             throw new BusinessException(GeneralError.ERROR_SERVICE);
         }
 
-        eliminarBasePermisos(id);
-        return "Eliminado Correctamente";
-    }
-
-    private void validarRangoFechas(InasistenciaRequestDto request) {
         if (request.getFechaFin().isBefore(request.getFechaInicio())) {
-            throw new BusinessException(GeneralError.ERROR_SERVICE);
+            throw new BusinessException(GeneralError.RANGO_FECHAS_INVALIDO);
+        }
+
+        boolean existeCruce;
+
+        if (idInasistenciaActual != null) {
+            existeCruce = inasistenciaRepository.existeSolapamientoParaActualizar(
+                    request.getIdEmpleado(),
+                    request.getFechaInicio(),
+                    request.getFechaFin(),
+                    idInasistenciaActual
+            );
+        } else {
+            existeCruce = inasistenciaRepository.existeSolapamiento(
+                    request.getIdEmpleado(),
+                    request.getFechaInicio(),
+                    request.getFechaFin()
+            );
+        }
+
+        if (existeCruce) {
+            throw new BusinessException(GeneralError.SOLAPAMIENTO_INASISTENCIA);
         }
     }
 
