@@ -9,6 +9,8 @@ public class PlanillaDetalleDto {
     private Integer idPlanillaDetalle;
     private Integer idEmpleado;
     private String nombres;
+    private String puesto;
+    private String status;
     private LocalDate fechaContratacion;
     private BigDecimal ingresoSueldoBase;
     private BigDecimal ingresoBonificacionDecreto;

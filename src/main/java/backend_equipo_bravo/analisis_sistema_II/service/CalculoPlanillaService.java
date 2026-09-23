@@ -55,7 +55,12 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
 
     @Transactional
     public PlanillaResponseDto procesarOObtenerPlanilla(PlanillaRequestDto request) {
-        validarAlta();
+        if (request.getIsUpdate())
+            validarCambio();
+        else if (request.getIsFind())
+            validarConsulta();
+        else
+            validarAlta();
 
         if (request.getForzarRecalculo()) {
             planillaDetalleRepository.deleteByAnioAndMes(request.getAnio(), request.getMes());
