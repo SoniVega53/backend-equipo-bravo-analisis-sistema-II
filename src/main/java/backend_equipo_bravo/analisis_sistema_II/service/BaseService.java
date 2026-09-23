@@ -10,6 +10,7 @@ import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.GeneralError
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError;
 import backend_equipo_bravo.analisis_sistema_II.repository.RoleOpcionRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,11 +32,17 @@ public abstract class BaseService<T, ID> {
     @Lazy
     private RoleOpcionRepository roleOpcionRepository;
 
+    @Setter
+    protected String entityName = null;
+
     protected abstract JpaRepository<T, ID> getRepository();
 
     protected abstract RuntimeException getNotFoundException(ID id);
 
     private String getEntityName() {
+        if (entityName != null) {
+            return entityName;
+        }
         @SuppressWarnings("unchecked")
         Class<T> entityClass = (Class<T>) ((ParameterizedType) getClass()
                 .getGenericSuperclass()).getActualTypeArguments()[0];
