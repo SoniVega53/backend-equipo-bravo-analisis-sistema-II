@@ -26,6 +26,7 @@ public enum GeneralError {
 
     RANGO_FECHAS_INVALIDO(400, "RANGO_FECHAS_INVALIDO", "Rango de fechas inválido.", "La fecha final no puede ser anterior a la fecha inicial."),
     SOLAPAMIENTO_INASISTENCIA(400, "SOLAPAMIENTO_INASISTENCIA", "Conflicto de fechas.", "El empleado ya posee una inasistencia registrada que se cruza con el rango seleccionado."),
+    TRANSICION_STATUS_INVALIDA(400, "TRANSICION_STATUS_INVALIDA", "Transición de estatus no permitida.", "El cambio de estatus no corresponde a una transición permitida en el flujo de estados."),
 
     ERROR_DEPENDENCY(409, "ERROR_DEPENDENCY", "El registro no se puede eliminar porque está siendo utilizado en otra parte del sistema.", "");
 
