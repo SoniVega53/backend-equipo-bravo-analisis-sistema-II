@@ -71,9 +71,4 @@ public class Liquidacion {
     @Column(name = "usuariocreacion")
     private String usuarioCreacion;
 
-    @Column(name = "fechamodificacion")
-    private LocalDateTime fechaModificacion;
-
-    @Column(name = "usuariomodificacion")
-    private String usuarioModificacion;
 }
