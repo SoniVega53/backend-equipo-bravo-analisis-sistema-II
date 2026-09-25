@@ -205,9 +205,12 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         liquidacion.setTotalNeto(salarioNeto);
 
         // ACTUALIZACIÓN DE ESTATUS DEL EMPLEADO (Baja / Despedido)
+
         Integer nuevoStatus = request.getIdStatusEmpleado() != null
                 ? request.getIdStatusEmpleado()
                 : ControlStatusEmpleado.BAJA.getId();
+
+       // Integer nuevoStatus = ControlStatusEmpleado.BAJA.getId();
 
         Integer actualStatus = empleado.getIdStatusEmpleado();
         if (actualStatus != null && !actualStatus.equals(nuevoStatus)) {
