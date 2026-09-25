@@ -101,6 +101,7 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
         BigDecimal totalDescuentoGeneral = BigDecimal.ZERO;
         BigDecimal salarioNetoGeneral = BigDecimal.ZERO;
 
+        //Valida los estados del empleado si, si pueden ser procesados en planilla
         List<Empleado> empleadosActivos = empleadoRepository.findAll().stream()
                 .filter(e -> e.getIdStatusEmpleado() != null && (
                         e.getIdStatusEmpleado().equals(ControlStatusEmpleado.ACTIVO.getId()) ||
