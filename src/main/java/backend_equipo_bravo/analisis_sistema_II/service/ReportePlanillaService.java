@@ -27,7 +27,6 @@ public class ReportePlanillaService extends BaseService<PlanillaCabecera, Object
     private PersonaRepository personaRepository;
     @Autowired
     private StatusEmpleadoRepository statusEmpleadoRepository;
-
     @Autowired
     private PuestoRepository puestoRepository;
 
@@ -65,10 +64,10 @@ public class ReportePlanillaService extends BaseService<PlanillaCabecera, Object
             Persona persona = personaRepository.findById(empleado.getIdPersona())
                     .orElseThrow(() -> new BusinessException(GeneralError.ERROR_PERSONA_NOT_FOUND));
 
-            Puesto puesto = puestoRepository.findById(empleado.getIdPuesto())
+            Puesto puesto = puestoRepository.findById(d.getIdPuesto())
                     .orElseThrow(() -> new BusinessException(GeneralError.ERROR_PUESTO_NOT_FOUND));
 
-            StatusEmpleado statusEmpleado = statusEmpleadoRepository.findById(empleado.getIdStatusEmpleado())
+            StatusEmpleado statusEmpleado = statusEmpleadoRepository.findById(d.getIdStatusEmpleado())
                     .orElseThrow(() -> new BusinessException(GeneralError.ERROR_STATUS_NOT_FOUND));
 
             PlanillaDetalleDto dto = new PlanillaDetalleDto();

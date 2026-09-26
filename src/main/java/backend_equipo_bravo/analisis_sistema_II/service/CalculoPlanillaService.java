@@ -37,6 +37,10 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
     private PeriodoPlanillaRepository periodoPlanillaRepository;
     @Autowired
     private PersonaRepository personaRepository;
+    @Autowired
+    private StatusEmpleadoRepository statusEmpleadoRepository;
+    @Autowired
+    private PuestoRepository puestoRepository;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -74,10 +78,10 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
             }
         }
 
-        return generarNuevaPlanilla(request.getForzarRecalculo(), request.getAnio(), request.getMes());
+        return generarNuevaPlanilla(request.getIsUpdate() ,request.getForzarRecalculo(), request.getAnio(), request.getMes());
     }
 
-    private PlanillaResponseDto generarNuevaPlanilla(boolean forzar, Integer anio, Integer mes) {
+    private PlanillaResponseDto generarNuevaPlanilla(boolean isUpdate,boolean forzar, Integer anio, Integer mes) {
         Optional<PeriodoPlanilla> periodoOp = periodoPlanillaRepository.findByAnioAndMes(anio, mes);
         PeriodoPlanilla periodo = periodoOp.get();
 
@@ -85,8 +89,14 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
             periodo = new PeriodoPlanilla();
             periodo.setAnio(anio);
             periodo.setMes(mes);
-            periodo.setFechaCreacion(LocalDateTime.now());
-            periodo.setUsuarioCreacion(obtenerUsuarioAutenticado());
+            if (isUpdate){
+                periodo.setFechaModificacion(LocalDateTime.now());
+                periodo.setUsuarioModificacion(obtenerUsuarioAutenticado());
+            }else {
+                periodo.setFechaCreacion(LocalDateTime.now());
+                periodo.setUsuarioCreacion(obtenerUsuarioAutenticado());
+            }
+
         }
 
 
@@ -94,8 +104,14 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
         cabecera.setAnio(anio);
         cabecera.setMes(mes);
         cabecera.setFechaHoraProcesada(LocalDateTime.now());
-        cabecera.setFechaCreacion(LocalDateTime.now());
-        cabecera.setUsuarioCreacion(obtenerUsuarioAutenticado());
+        if (isUpdate){
+            cabecera.setFechaModificacion(LocalDateTime.now());
+            cabecera.setUsuarioModificacion(obtenerUsuarioAutenticado());
+        }else {
+            cabecera.setFechaCreacion(LocalDateTime.now());
+            cabecera.setUsuarioCreacion(obtenerUsuarioAutenticado());
+        }
+
 
         BigDecimal totalIngresoGeneral = BigDecimal.ZERO;
         BigDecimal totalDescuentoGeneral = BigDecimal.ZERO;
@@ -154,8 +170,15 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
             detalle.setDescuentoIsr(descuentoIsr);
             detalle.setDescuentoInasistencias(descuentoInasistencias);
             detalle.setSalarioNeto(salarioNetoEmpleado);
-            detalle.setFechaCreacion(LocalDateTime.now());
-            detalle.setUsuarioCreacion(obtenerUsuarioAutenticado());
+
+            if (isUpdate){
+                detalle.setFechaModificacion(LocalDateTime.now());
+                detalle.setUsuarioModificacion(obtenerUsuarioAutenticado());
+            }else{
+                detalle.setFechaCreacion(LocalDateTime.now());
+                detalle.setUsuarioCreacion(obtenerUsuarioAutenticado());
+            }
+
 
             planillaDetalleRepository.save(detalle);
 
@@ -243,9 +266,17 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
             Persona persona =  personaRepository.findById(empleado.getIdPersona()).
                     orElseThrow(() -> new BusinessException(GeneralError.ERROR_PERSONA_NOT_FOUND));
 
+            Puesto puesto = puestoRepository.findById(d.getIdPuesto())
+                    .orElseThrow(() -> new BusinessException(GeneralError.ERROR_PUESTO_NOT_FOUND));
+
+            StatusEmpleado statusEmpleado = statusEmpleadoRepository.findById(d.getIdStatusEmpleado())
+                    .orElseThrow(() -> new BusinessException(GeneralError.ERROR_STATUS_NOT_FOUND));
+
             PlanillaDetalleDto dto = new PlanillaDetalleDto();
             dto.setIdPlanillaDetalle(d.getIdPlanillaDetalle());
             dto.setIdEmpleado(d.getIdEmpleado());
+            dto.setStatus(statusEmpleado.getNombre());
+            dto.setPuesto(puesto.getNombre());
             dto.setNombres(persona.getNombre().concat(" ").concat(persona.getApellido()));
             dto.setFechaContratacion(d.getFechaContratacion());
             dto.setIngresoSueldoBase(d.getIngresoSueldoBase());
