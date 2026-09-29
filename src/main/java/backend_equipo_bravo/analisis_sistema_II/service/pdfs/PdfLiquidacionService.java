@@ -1,7 +1,6 @@
 package backend_equipo_bravo.analisis_sistema_II.service.pdfs;
 
 import backend_equipo_bravo.analisis_sistema_II.dto.liquidacion.LiquidacionDto;
-
 import backend_equipo_bravo.analisis_sistema_II.service.LiquidacionService;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
@@ -72,7 +71,8 @@ public class PdfLiquidacionService {
             celdaDescuentos.setPadding(8);
             tablaDesglose.addCell(celdaDescuentos);
 
-            tablaDesglose.addCell(crearCeldaDetalle("Sueldo Base", formatMonto(df, data.getIngresoSueldoBase()), fontNormal));
+            // Detalle Ingresos Ordinarios / Descuento IGSS
+            tablaDesglose.addCell(crearCeldaDetalle("Sueldo Base (" + (data.getDiasPendientesPago() != null ? data.getDiasPendientesPago() : 0) + " d)", formatMonto(df, data.getIngresoSueldoBase()), fontNormal));
             tablaDesglose.addCell(crearCeldaDetalle("Descuento IGSS", formatMonto(df, data.getDescuentoIgss()), fontNormal));
 
             tablaDesglose.addCell(crearCeldaDetalle("Bonificación Decreto", formatMonto(df, data.getIngresoBonificacionDecreto()), fontNormal));
@@ -80,6 +80,29 @@ public class PdfLiquidacionService {
 
             tablaDesglose.addCell(crearCeldaDetalle("Otros Ingresos", formatMonto(df, data.getIngresoOtrosIngresos()), fontNormal));
             tablaDesglose.addCell(crearCeldaDetalle("Inasistencias", formatMonto(df, data.getDescuentoInasistencias()), fontNormal));
+
+            // Prestaciones calculadas (Solo aplican en liquidación)
+            if (data.getMontoAguinaldo() != null && data.getMontoAguinaldo().compareTo(BigDecimal.ZERO) >= 0) {
+                tablaDesglose.addCell(crearCeldaDetalle("Aguinaldo Proporcional", formatMonto(df, data.getMontoAguinaldo()), fontNormal));
+            } else {
+                tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal)); // Placeholder
+            }
+            tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal));
+
+            if (data.getMontoBono14() != null && data.getMontoBono14().compareTo(BigDecimal.ZERO) >= 0) {
+                tablaDesglose.addCell(crearCeldaDetalle("Bono 14 Proporcional", formatMonto(df, data.getMontoBono14()), fontNormal));
+                tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal));
+            }
+
+            if (data.getMontoVacaciones() != null && data.getMontoVacaciones().compareTo(BigDecimal.ZERO) >= 0) {
+                tablaDesglose.addCell(crearCeldaDetalle("Vacaciones Proporcionales", formatMonto(df, data.getMontoVacaciones()), fontNormal));
+                tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal));
+            }
+
+            if (data.getMontoIndemnizacion() != null && data.getMontoIndemnizacion().compareTo(BigDecimal.ZERO) > 0) {
+                tablaDesglose.addCell(crearCeldaDetalle("Indemnización (Despido)", formatMonto(df, data.getMontoIndemnizacion()), fontNormal));
+                tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal));
+            }
 
             document.add(tablaDesglose);
 
