@@ -1,7 +1,6 @@
 package backend_equipo_bravo.analisis_sistema_II.service.pdfs;
 
 import backend_equipo_bravo.analisis_sistema_II.dto.liquidacion.LiquidacionDto;
-
 import backend_equipo_bravo.analisis_sistema_II.service.LiquidacionService;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
@@ -35,7 +34,6 @@ public class PdfLiquidacionService {
             Font fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 11, BaseColor.BLACK);
             Font fontBold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11, BaseColor.BLACK);
 
-            DecimalFormat df = new DecimalFormat("Q #,##0.00");
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
             Paragraph titulo = new Paragraph("BOLETA DE LIQUIDACIÓN", fontTitulo);
@@ -52,10 +50,13 @@ public class PdfLiquidacionService {
             if (data.getNombreDepartamento() != null && !data.getNombreDepartamento().isBlank()) {
                 agregarCeldaSinBorde(tablaInfo, "Departamento: " + safeString(data.getNombreDepartamento()), fontNormal);
             }
+            agregarCeldaSinBorde(tablaInfo, "Sueldo Base Mensual: " + formatMonto(data.getIngresoSueldoBase()), fontNormal);
             agregarCeldaSinBorde(tablaInfo, "Fecha Contratación: " + (data.getFechaContratacion() != null ? data.getFechaContratacion().format(dtf) : "N/A"), fontNormal);
             agregarCeldaSinBorde(tablaInfo, "Fecha Egreso: " + (data.getFechaEgreso() != null ? data.getFechaEgreso().format(dtf) : "N/A"), fontNormal);
             agregarCeldaSinBorde(tablaInfo, "Motivo Egreso: " + safeString(data.getMotivoEgreso()), fontNormal);
             agregarCeldaSinBorde(tablaInfo, "Fecha Proceso: " + (data.getFechaLiquidacion() != null ? data.getFechaLiquidacion().format(dtf) : "N/A"), fontNormal);
+            
+            tablaInfo.completeRow(); // Ensure table structure is valid
             document.add(tablaInfo);
 
             PdfPTable tablaDesglose = new PdfPTable(2);
@@ -72,25 +73,53 @@ public class PdfLiquidacionService {
             celdaDescuentos.setPadding(8);
             tablaDesglose.addCell(celdaDescuentos);
 
-            tablaDesglose.addCell(crearCeldaDetalle("Sueldo Base", formatMonto(df, data.getIngresoSueldoBase()), fontNormal));
-            tablaDesglose.addCell(crearCeldaDetalle("Descuento IGSS", formatMonto(df, data.getDescuentoIgss()), fontNormal));
+            // Detalle Ingresos Ordinarios / Descuento IGSS
+            BigDecimal igssCalculado = (data.getTotalDescuentos() != null ? data.getTotalDescuentos() : BigDecimal.ZERO)
+                    .subtract(data.getDescuentoIsr() != null ? data.getDescuentoIsr() : BigDecimal.ZERO)
+                    .subtract(data.getDescuentoInasistencias() != null ? data.getDescuentoInasistencias() : BigDecimal.ZERO);
 
-            tablaDesglose.addCell(crearCeldaDetalle("Bonificación Decreto", formatMonto(df, data.getIngresoBonificacionDecreto()), fontNormal));
-            tablaDesglose.addCell(crearCeldaDetalle("Descuento ISR", formatMonto(df, data.getDescuentoIsr()), fontNormal));
+            int diasPendientes = data.getDiasPendientesPago() != null ? data.getDiasPendientesPago() : 0;
+            
+            tablaDesglose.addCell(crearCeldaDetalle("Salario Pendiente (" + diasPendientes + " d)", formatMonto(data.getMontoSalarioPendiente() != null ? data.getMontoSalarioPendiente() : data.getIngresoSueldoBase()), fontNormal));
+            tablaDesglose.addCell(crearCeldaDetalle("Descuento IGSS", formatMonto(igssCalculado), fontNormal));
 
-            tablaDesglose.addCell(crearCeldaDetalle("Otros Ingresos", formatMonto(df, data.getIngresoOtrosIngresos()), fontNormal));
-            tablaDesglose.addCell(crearCeldaDetalle("Inasistencias", formatMonto(df, data.getDescuentoInasistencias()), fontNormal));
+            tablaDesglose.addCell(crearCeldaDetalle("Bonif. Decreto Proporcional (" + diasPendientes + " d)", formatMonto(data.getMontoBonificacionDecretoPendiente() != null ? data.getMontoBonificacionDecretoPendiente() : data.getIngresoBonificacionDecreto()), fontNormal));
+            tablaDesglose.addCell(crearCeldaDetalle("Descuento ISR", formatMonto(data.getDescuentoIsr()), fontNormal));
+
+            tablaDesglose.addCell(crearCeldaDetalle("Otros Ingresos", formatMonto(data.getIngresoOtrosIngresos()), fontNormal));
+            tablaDesglose.addCell(crearCeldaDetalle("Inasistencias", formatMonto(data.getDescuentoInasistencias()), fontNormal));
+
+            // Prestaciones calculadas (Solo aplican en liquidación)
+            if (data.getMontoAguinaldo() != null && data.getMontoAguinaldo().compareTo(BigDecimal.ZERO) > 0) {
+                tablaDesglose.addCell(crearCeldaDetalle("Aguinaldo Proporcional", formatMonto(data.getMontoAguinaldo()), fontNormal));
+                tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal));
+            }
+
+            if (data.getMontoBono14() != null && data.getMontoBono14().compareTo(BigDecimal.ZERO) > 0) {
+                tablaDesglose.addCell(crearCeldaDetalle("Bono 14 Proporcional", formatMonto(data.getMontoBono14()), fontNormal));
+                tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal));
+            }
+
+            if (data.getMontoVacaciones() != null && data.getMontoVacaciones().compareTo(BigDecimal.ZERO) > 0) {
+                tablaDesglose.addCell(crearCeldaDetalle("Vacaciones Proporcionales", formatMonto(data.getMontoVacaciones()), fontNormal));
+                tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal));
+            }
+
+            if (data.getMontoIndemnizacion() != null && data.getMontoIndemnizacion().compareTo(BigDecimal.ZERO) > 0) {
+                tablaDesglose.addCell(crearCeldaDetalle("Indemnización (Despido)", formatMonto(data.getMontoIndemnizacion()), fontNormal));
+                tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal));
+            }
 
             document.add(tablaDesglose);
 
             PdfPTable tablaTotales = new PdfPTable(2);
             tablaTotales.setWidthPercentage(100);
 
-            tablaTotales.addCell(crearCeldaDetalle("Total Ingresos:", formatMonto(df, data.getTotalIngresos()), fontBold));
-            tablaTotales.addCell(crearCeldaDetalle("Total Descuentos:", formatMonto(df, data.getTotalDescuentos()), fontBold));
+            tablaTotales.addCell(crearCeldaDetalle("Total Ingresos:", formatMonto(data.getTotalIngresos()), fontBold));
+            tablaTotales.addCell(crearCeldaDetalle("Total Descuentos:", formatMonto(data.getTotalDescuentos()), fontBold));
             document.add(tablaTotales);
 
-            Paragraph neto = new Paragraph("TOTAL LIQUIDADO: " + formatMonto(df, data.getTotalNeto()), fontTitulo);
+            Paragraph neto = new Paragraph("TOTAL LIQUIDADO: " + formatMonto(data.getTotalNeto()), fontTitulo);
             neto.setAlignment(Element.ALIGN_RIGHT);
             neto.setPaddingTop(20);
             document.add(neto);
@@ -131,7 +160,11 @@ public class PdfLiquidacionService {
         return (text != null && !text.isBlank()) ? text : "N/A";
     }
 
-    private String formatMonto(DecimalFormat df, BigDecimal monto) {
-        return df.format(monto != null ? monto : BigDecimal.ZERO);
+    private String formatMonto(BigDecimal monto) {
+        if (monto == null) monto = BigDecimal.ZERO;
+        java.text.NumberFormat nf = java.text.NumberFormat.getNumberInstance(new java.util.Locale("es", "GT"));
+        nf.setMinimumFractionDigits(2);
+        nf.setMaximumFractionDigits(2);
+        return "Q " + nf.format(monto);
     }
 }

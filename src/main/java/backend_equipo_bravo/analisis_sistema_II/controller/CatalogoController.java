@@ -69,9 +69,19 @@ public class CatalogoController extends BaseController {
         return success(catalogoService.getStatusEmpleados(), SuccessCode.GENERAL);
     }
 
+    @GetMapping("/status-liquidacion")
+    public ResponseEntity<?> getStatusLiquidacion() {
+        return success(catalogoService.getStatusLiquidacion(), SuccessCode.GENERAL);
+    }
+
     @GetMapping("/tipos-documentos")
     public ResponseEntity<?> getTiposDocumentos() {
         return success(catalogoService.getTiposDocumentos(), SuccessCode.GENERAL);
+    }
+
+    @GetMapping("/motivos-egreso")
+    public ResponseEntity<?> getMotivosEgreso() {
+        return success(catalogoService.getMotivosEgreso(), SuccessCode.GENERAL);
     }
 
     @GetMapping("/departamentos")
