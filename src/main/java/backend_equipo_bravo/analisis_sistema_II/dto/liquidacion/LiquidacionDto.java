@@ -34,6 +34,13 @@ public class LiquidacionDto {
     private BigDecimal totalNeto;
     private LocalDateTime fechaCreacion;
 
+    // Opciones de cálculo automático
+    private Boolean calcularSalarioPendiente = true;
+    private Boolean calcularAguinaldo = true;
+    private Boolean calcularBono14 = true;
+    private Boolean calcularVacaciones = true;
+    private Boolean calcularIndemnizacion = true;
+
     // Campos calculados en tiempo de ejecución (Desglose Guatemala)
     private Integer diasLaboradosTotal;
     private BigDecimal montoIndemnizacion;

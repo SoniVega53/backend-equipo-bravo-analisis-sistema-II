@@ -156,46 +156,62 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         }
 
         Integer nuevoStatus = request.getIdStatusEmpleado() != null ? request.getIdStatusEmpleado() : ControlStatusEmpleado.BAJA.getId();
-        boolean esDespido = nuevoStatus == 5;
-        String motivoEgreso = esDespido ? "Despido" : "Renuncia";
+        boolean esDespido = nuevoStatus.equals(ControlStatusEmpleado.DESPEDIDO.getId());
+        String motivoEgreso = request.getMotivoEgreso() != null && !request.getMotivoEgreso().isBlank() ? request.getMotivoEgreso() : (esDespido ? "Despido" : "Renuncia");
 
         liquidacion.setIdEmpleado(empleado.getIdEmpleado());
         liquidacion.setFechaContratacion(fechaContratacion);
         liquidacion.setFechaEgreso(fechaEgreso);
         liquidacion.setFechaLiquidacion(LocalDate.now());
         liquidacion.setMotivoEgreso(motivoEgreso);
+        liquidacion.setIdPuesto(request.getIdPuesto() != null ? request.getIdPuesto() : empleado.getIdPuesto());
 
-        Integer idPuesto = request.getIdPuesto() != null ? request.getIdPuesto() : empleado.getIdPuesto();
-        liquidacion.setIdPuesto(idPuesto);
-
-        BigDecimal salarioBase = valorOZero(request.getIngresoSueldoBase() != null ? request.getIngresoSueldoBase() : empleado.getIngresoSueldoBase());
-        
-        // --- REALIZAR LOS CÁLCULOS DINÁMICOS AL ESTILO GUATEMALA ---
-        LiquidacionDto calculosTemporales = calcularDesglose(salarioBase, fechaContratacion, fechaEgreso, esDespido);
-        
-        // Guardar las agrupaciones en los campos existentes de la base de datos
-        liquidacion.setIngresoSueldoBase(calculosTemporales.getMontoSalarioPendiente());
-        liquidacion.setIngresoBonificacionDecreto(calculosTemporales.getMontoBonificacionDecretoPendiente());
-        
-        // Se agrupan todas las prestaciones e indemnización en "ingresoOtrosIngresos" para no afectar la DB
-        BigDecimal otrosExtras = valorOZero(request.getIngresoOtrosIngresos());
-        BigDecimal totalPrestaciones = calculosTemporales.getMontoIndemnizacion()
-                .add(calculosTemporales.getMontoAguinaldo())
-                .add(calculosTemporales.getMontoBono14())
-                .add(calculosTemporales.getMontoVacaciones())
-                .add(otrosExtras);
-        liquidacion.setIngresoOtrosIngresos(totalPrestaciones);
-
-        // Descuentos: se aplica el IGSS solo al salario ordinario (calculado previamente)
-        liquidacion.setDescuentoIgss(calculosTemporales.getDescuentoIgss());
+        // 1. SET THE RAW BASE COLUMNS EXACTLY AS TYPED IN THE FORM
+        liquidacion.setIngresoSueldoBase(valorOZero(request.getIngresoSueldoBase()));
+        liquidacion.setIngresoBonificacionDecreto(valorOZero(request.getIngresoBonificacionDecreto()));
+        liquidacion.setIngresoOtrosIngresos(valorOZero(request.getIngresoOtrosIngresos()));
+        liquidacion.setDescuentoIgss(valorOZero(request.getDescuentoIgss()));
         liquidacion.setDescuentoIsr(valorOZero(request.getDescuentoIsr()));
         liquidacion.setDescuentoInasistencias(valorOZero(request.getDescuentoInasistencias()));
 
-        BigDecimal totalIngresos = liquidacion.getIngresoSueldoBase()
-                .add(liquidacion.getIngresoBonificacionDecreto())
-                .add(liquidacion.getIngresoOtrosIngresos());
+        boolean calcSalario = true;
+        if (request.getCalcularSalarioPendiente() != null) {
+            calcSalario = request.getCalcularSalarioPendiente().toString().equalsIgnoreCase("true");
+        }
+        boolean calcAguinaldo = true;
+        if (request.getCalcularAguinaldo() != null) {
+            calcAguinaldo = request.getCalcularAguinaldo().toString().equalsIgnoreCase("true");
+        }
+        boolean calcBono14 = true;
+        if (request.getCalcularBono14() != null) {
+            calcBono14 = request.getCalcularBono14().toString().equalsIgnoreCase("true");
+        }
+        boolean calcVacaciones = true;
+        if (request.getCalcularVacaciones() != null) {
+            calcVacaciones = request.getCalcularVacaciones().toString().equalsIgnoreCase("true");
+        }
+        boolean calcIndemnizacion = esDespido;
+        if (request.getCalcularIndemnizacion() != null) {
+            calcIndemnizacion = request.getCalcularIndemnizacion().toString().equalsIgnoreCase("true") && esDespido;
+        }
 
-        BigDecimal totalDescuentos = liquidacion.getDescuentoIgss()
+        LiquidacionDto calculosTemporales = calcularDesglose(liquidacion.getIngresoSueldoBase(), fechaContratacion, fechaEgreso, calcIndemnizacion, calcSalario, calcAguinaldo, calcBono14, calcVacaciones);
+        
+        BigDecimal montoSueldoParaTotal = calcSalario ? calculosTemporales.getMontoSalarioPendiente() : liquidacion.getIngresoSueldoBase();
+        BigDecimal montoBonoParaTotal = calcSalario ? calculosTemporales.getMontoBonificacionDecretoPendiente() : liquidacion.getIngresoBonificacionDecreto();
+        BigDecimal montoIgssParaTotal = calcSalario ? calculosTemporales.getDescuentoIgss() : liquidacion.getDescuentoIgss();
+
+        BigDecimal prestaciones = calculosTemporales.getMontoIndemnizacion()
+                .add(calculosTemporales.getMontoAguinaldo())
+                .add(calculosTemporales.getMontoBono14())
+                .add(calculosTemporales.getMontoVacaciones());
+
+        BigDecimal totalIngresos = montoSueldoParaTotal
+                .add(montoBonoParaTotal)
+                .add(liquidacion.getIngresoOtrosIngresos())
+                .add(prestaciones);
+
+        BigDecimal totalDescuentos = montoIgssParaTotal
                 .add(liquidacion.getDescuentoIsr())
                 .add(liquidacion.getDescuentoInasistencias());
 
@@ -222,7 +238,7 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         return mapearADto(crearBase(liquidacion));
     }
 
-    private LiquidacionDto calcularDesglose(BigDecimal salarioBase, LocalDate contratacion, LocalDate egreso, boolean esDespido) {
+    private LiquidacionDto calcularDesglose(BigDecimal salarioBase, LocalDate contratacion, LocalDate egreso, boolean calcIndemnizacion, boolean calcSalario, boolean calcAguinaldo, boolean calcBono14, boolean calcVacaciones) {
         LiquidacionDto dto = new LiquidacionDto();
         
         int diasTotales = (int) ChronoUnit.DAYS.between(contratacion, egreso);
@@ -232,49 +248,63 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         // Indemnización
         BigDecimal salarioPromedioIndemnizacion = salarioBase.multiply(new BigDecimal("14")).divide(new BigDecimal("12"), 2, RoundingMode.HALF_UP);
         BigDecimal montoIndemnizacion = BigDecimal.ZERO;
-        if (esDespido) {
+        if (calcIndemnizacion) {
             montoIndemnizacion = salarioPromedioIndemnizacion.divide(new BigDecimal("365"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasTotales)).setScale(2, RoundingMode.HALF_UP);
         }
         dto.setMontoIndemnizacion(montoIndemnizacion);
 
         // Aguinaldo
-        LocalDate inicioAguinaldo = egreso.getMonthValue() == 12 ? LocalDate.of(egreso.getYear(), 12, 1) : LocalDate.of(egreso.getYear() - 1, 12, 1);
-        if (inicioAguinaldo.isBefore(contratacion)) inicioAguinaldo = contratacion;
-        int diasAguinaldo = (int) ChronoUnit.DAYS.between(inicioAguinaldo, egreso);
-        if(diasAguinaldo < 0) diasAguinaldo = 0;
-        BigDecimal montoAguinaldo = salarioBase.divide(new BigDecimal("365"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasAguinaldo)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal montoAguinaldo = BigDecimal.ZERO;
+        int diasAguinaldo = 0;
+        if (calcAguinaldo) {
+            LocalDate inicioAguinaldo = egreso.getMonthValue() == 12 ? LocalDate.of(egreso.getYear(), 12, 1) : LocalDate.of(egreso.getYear() - 1, 12, 1);
+            if (inicioAguinaldo.isBefore(contratacion)) inicioAguinaldo = contratacion;
+            diasAguinaldo = (int) ChronoUnit.DAYS.between(inicioAguinaldo, egreso);
+            if(diasAguinaldo < 0) diasAguinaldo = 0;
+            montoAguinaldo = salarioBase.divide(new BigDecimal("365"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasAguinaldo)).setScale(2, RoundingMode.HALF_UP);
+        }
         dto.setDiasProporcionalesAguinaldo(diasAguinaldo);
         dto.setMontoAguinaldo(montoAguinaldo);
 
         // Bono 14
-        LocalDate inicioBono14 = egreso.getMonthValue() >= 7 ? LocalDate.of(egreso.getYear(), 7, 1) : LocalDate.of(egreso.getYear() - 1, 7, 1);
-        if (inicioBono14.isBefore(contratacion)) inicioBono14 = contratacion;
-        int diasBono14 = (int) ChronoUnit.DAYS.between(inicioBono14, egreso);
-        if(diasBono14 < 0) diasBono14 = 0;
-        BigDecimal montoBono14 = salarioBase.divide(new BigDecimal("365"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasBono14)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal montoBono14 = BigDecimal.ZERO;
+        int diasBono14 = 0;
+        if (calcBono14) {
+            LocalDate inicioBono14 = egreso.getMonthValue() >= 7 ? LocalDate.of(egreso.getYear(), 7, 1) : LocalDate.of(egreso.getYear() - 1, 7, 1);
+            if (inicioBono14.isBefore(contratacion)) inicioBono14 = contratacion;
+            diasBono14 = (int) ChronoUnit.DAYS.between(inicioBono14, egreso);
+            if(diasBono14 < 0) diasBono14 = 0;
+            montoBono14 = salarioBase.divide(new BigDecimal("365"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasBono14)).setScale(2, RoundingMode.HALF_UP);
+        }
         dto.setDiasProporcionalesBono14(diasBono14);
         dto.setMontoBono14(montoBono14);
 
         // Vacaciones
-        int aniosCompletos = Period.between(contratacion, egreso).getYears();
-        LocalDate ultimoAniversario = contratacion.plusYears(aniosCompletos);
-        int diasVacaciones = (int) ChronoUnit.DAYS.between(ultimoAniversario, egreso);
-        if(diasVacaciones < 0) diasVacaciones = 0;
-        BigDecimal montoVacaciones = salarioBase.divide(new BigDecimal("30"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal("15")).multiply(new BigDecimal(diasVacaciones)).divide(new BigDecimal("365"), 2, RoundingMode.HALF_UP);
+        BigDecimal montoVacaciones = BigDecimal.ZERO;
+        int diasVacaciones = 0;
+        if (calcVacaciones) {
+            int aniosCompletos = Period.between(contratacion, egreso).getYears();
+            LocalDate ultimoAniversario = contratacion.plusYears(aniosCompletos);
+            diasVacaciones = (int) ChronoUnit.DAYS.between(ultimoAniversario, egreso);
+            if(diasVacaciones < 0) diasVacaciones = 0;
+            montoVacaciones = salarioBase.divide(new BigDecimal("30"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal("15")).multiply(new BigDecimal(diasVacaciones)).divide(new BigDecimal("365"), 2, RoundingMode.HALF_UP);
+        }
         dto.setDiasProporcionalesVacaciones(diasVacaciones);
         dto.setMontoVacaciones(montoVacaciones);
 
         // Salario Pendiente
+        BigDecimal montoSalarioPendiente = BigDecimal.ZERO;
+        BigDecimal montoBonoDecreto = BigDecimal.ZERO;
+        BigDecimal descuentoIgss = BigDecimal.ZERO;
         int diasPendientes = egreso.getDayOfMonth();
-        BigDecimal montoSalarioPendiente = salarioBase.divide(new BigDecimal("30"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasPendientes)).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal montoBonoDecreto = new BigDecimal("250").divide(new BigDecimal("30"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasPendientes)).setScale(2, RoundingMode.HALF_UP);
-
+        if (calcSalario) {
+            montoSalarioPendiente = salarioBase.divide(new BigDecimal("30"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasPendientes)).setScale(2, RoundingMode.HALF_UP);
+            montoBonoDecreto = new BigDecimal("250").divide(new BigDecimal("30"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasPendientes)).setScale(2, RoundingMode.HALF_UP);
+            descuentoIgss = montoSalarioPendiente.multiply(new BigDecimal("0.0483")).setScale(2, RoundingMode.HALF_UP);
+        }
         dto.setDiasPendientesPago(diasPendientes);
         dto.setMontoSalarioPendiente(montoSalarioPendiente);
         dto.setMontoBonificacionDecretoPendiente(montoBonoDecreto);
-
-        // Descuentos
-        BigDecimal descuentoIgss = montoSalarioPendiente.multiply(new BigDecimal("0.0483")).setScale(2, RoundingMode.HALF_UP);
         dto.setDescuentoIgss(descuentoIgss);
 
         return dto;
@@ -304,32 +334,79 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         dto.setMotivoEgreso(entidad.getMotivoEgreso());
         dto.setIdPuesto(entidad.getIdPuesto());
 
-        // Campos de DB
         dto.setIngresoSueldoBase(entidad.getIngresoSueldoBase());
         dto.setIngresoBonificacionDecreto(entidad.getIngresoBonificacionDecreto());
         dto.setIngresoOtrosIngresos(entidad.getIngresoOtrosIngresos());
         dto.setDescuentoIgss(entidad.getDescuentoIgss());
         dto.setDescuentoIsr(entidad.getDescuentoIsr());
         dto.setDescuentoInasistencias(entidad.getDescuentoInasistencias());
+
         dto.setSalarioNeto(entidad.getSalarioNeto());
         dto.setTotalIngresos(entidad.getTotalIngresos());
         dto.setTotalDescuentos(entidad.getTotalDescuentos());
         dto.setTotalNeto(entidad.getTotalNeto());
         dto.setFechaCreacion(entidad.getFechaCreacion());
 
-        // Reconstruimos el desglose en base al salario base original
-        BigDecimal salarioOriginal = BigDecimal.ZERO;
-        boolean esDespido = "Despido".equalsIgnoreCase(entidad.getMotivoEgreso());
-        
+        boolean esDespido = false;
         Optional<Empleado> empOpt = empleadoRepository.findById(entidad.getIdEmpleado());
-        if (empOpt.isPresent()) {
-            salarioOriginal = empOpt.get().getIngresoSueldoBase();
+        if (empOpt.isPresent() && empOpt.get().getIdStatusEmpleado() != null) {
+            esDespido = empOpt.get().getIdStatusEmpleado().equals(ControlStatusEmpleado.DESPEDIDO.getId());
         }
 
-        // Si tenemos datos, re-calculamos el desglose
-        if (entidad.getFechaContratacion() != null && entidad.getFechaEgreso() != null && salarioOriginal != null && salarioOriginal.compareTo(BigDecimal.ZERO) > 0) {
-            LiquidacionDto desglose = calcularDesglose(salarioOriginal, entidad.getFechaContratacion(), entidad.getFechaEgreso(), esDespido);
+        if (entidad.getFechaContratacion() != null && entidad.getFechaEgreso() != null && entidad.getIngresoSueldoBase().compareTo(BigDecimal.ZERO) > 0) {
+            LiquidacionDto desglose = calcularDesglose(entidad.getIngresoSueldoBase(), entidad.getFechaContratacion(), entidad.getFechaEgreso(), true, true, true, true, true);
             
+            // Adivinar la combinación exacta de banderas (true/false) que produjo este TotalIngresos
+            BigDecimal valSalarioTrue = valorOZero(desglose.getMontoSalarioPendiente()).add(valorOZero(desglose.getMontoBonificacionDecretoPendiente()));
+            BigDecimal valSalarioFalse = valorOZero(entidad.getIngresoSueldoBase()).add(valorOZero(entidad.getIngresoBonificacionDecreto()));
+            BigDecimal valOtros = valorOZero(entidad.getIngresoOtrosIngresos());
+            
+            BigDecimal valIndemnizacion = valorOZero(desglose.getMontoIndemnizacion());
+            BigDecimal valAguinaldo = valorOZero(desglose.getMontoAguinaldo());
+            BigDecimal valBono14 = valorOZero(desglose.getMontoBono14());
+            BigDecimal valVacaciones = valorOZero(desglose.getMontoVacaciones());
+
+            BigDecimal totalDB = valorOZero(entidad.getTotalIngresos());
+            
+            boolean cSal = true, cInd = true, cAgu = true, cBon = true, cVac = true;
+            boolean found = false;
+
+            for(int i = 0; i < 32; i++) {
+                boolean tSal = (i & 1) != 0;
+                boolean tInd = (i & 2) != 0;
+                boolean tAgu = (i & 4) != 0;
+                boolean tBon = (i & 8) != 0;
+                boolean tVac = (i & 16) != 0;
+                
+                BigDecimal sum = valOtros.add(tSal ? valSalarioTrue : valSalarioFalse);
+                if (tInd) sum = sum.add(valIndemnizacion);
+                if (tAgu) sum = sum.add(valAguinaldo);
+                if (tBon) sum = sum.add(valBono14);
+                if (tVac) sum = sum.add(valVacaciones);
+                
+                if (sum.subtract(totalDB).abs().compareTo(new BigDecimal("1.00")) <= 0) {
+                    cSal = tSal; cInd = tInd; cAgu = tAgu; cBon = tBon; cVac = tVac;
+                    found = true; break;
+                }
+            }
+
+            // Si por alguna razón matemática no cuadra exacto, asumimos que todas están en false (puros crudos del form)
+            if (!found) {
+                cSal = false; cInd = false; cAgu = false; cBon = false; cVac = false;
+            }
+
+            // Aplicamos los resultados deducidos al desglose final
+            if (!cSal) {
+                desglose.setMontoSalarioPendiente(entidad.getIngresoSueldoBase());
+                desglose.setMontoBonificacionDecretoPendiente(entidad.getIngresoBonificacionDecreto());
+                desglose.setDescuentoIgss(entidad.getDescuentoIgss());
+                desglose.setDiasPendientesPago(null); 
+            }
+            if (!cInd) { desglose.setMontoIndemnizacion(BigDecimal.ZERO); }
+            if (!cAgu) { desglose.setMontoAguinaldo(BigDecimal.ZERO); desglose.setDiasProporcionalesAguinaldo(0); }
+            if (!cBon) { desglose.setMontoBono14(BigDecimal.ZERO); desglose.setDiasProporcionalesBono14(0); }
+            if (!cVac) { desglose.setMontoVacaciones(BigDecimal.ZERO); desglose.setDiasProporcionalesVacaciones(0); }
+
             dto.setDiasLaboradosTotal(desglose.getDiasLaboradosTotal());
             dto.setMontoIndemnizacion(desglose.getMontoIndemnizacion());
             dto.setDiasProporcionalesAguinaldo(desglose.getDiasProporcionalesAguinaldo());
@@ -339,19 +416,10 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
             dto.setDiasProporcionalesVacaciones(desglose.getDiasProporcionalesVacaciones());
             dto.setMontoVacaciones(desglose.getMontoVacaciones());
             dto.setDiasPendientesPago(desglose.getDiasPendientesPago());
+            
+            // Usamos las variables en DTO transient solo para el renderizado PDF
             dto.setMontoSalarioPendiente(desglose.getMontoSalarioPendiente());
-
-            // Deduce "Otros Ingresos" reales
-            BigDecimal sumPrestaciones = desglose.getMontoIndemnizacion()
-                .add(desglose.getMontoAguinaldo())
-                .add(desglose.getMontoBono14())
-                .add(desglose.getMontoVacaciones());
-            
-            BigDecimal purosOtros = valorOZero(entidad.getIngresoOtrosIngresos()).subtract(sumPrestaciones);
-            // Si por error de rounding da un negativo tiny, lo ponemos en 0
-            if(purosOtros.compareTo(BigDecimal.ZERO) < 0) purosOtros = BigDecimal.ZERO;
-            
-            dto.setIngresoOtrosIngresos(purosOtros);
+            dto.setMontoBonificacionDecretoPendiente(desglose.getMontoBonificacionDecretoPendiente());
         }
 
         if (empOpt.isPresent()) {

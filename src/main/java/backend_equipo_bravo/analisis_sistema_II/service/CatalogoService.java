@@ -1,11 +1,13 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
+import backend_equipo_bravo.analisis_sistema_II.dto.ControlStatusEmpleado;
 import backend_equipo_bravo.analisis_sistema_II.dto.SelectOptionDto;
 import backend_equipo_bravo.analisis_sistema_II.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Service
@@ -122,6 +124,14 @@ public class CatalogoService {
 
     public List<SelectOptionDto> getStatusEmpleados() {
         return statusEmpleadoRepository.findAll().stream()
+                .map(s -> new SelectOptionDto(s.getIdStatusEmpleado(), s.getNombre()))
+                .collect(Collectors.toList());
+    }
+
+    public List<SelectOptionDto> getStatusLiquidacion() {
+        List<Integer> idsPermitidos = Arrays.asList(ControlStatusEmpleado.BAJA.getId(), ControlStatusEmpleado.DESPEDIDO.getId());
+        return statusEmpleadoRepository.findAll().stream()
+                .filter(s -> idsPermitidos.contains(s.getIdStatusEmpleado()))
                 .map(s -> new SelectOptionDto(s.getIdStatusEmpleado(), s.getNombre()))
                 .collect(Collectors.toList());
     }

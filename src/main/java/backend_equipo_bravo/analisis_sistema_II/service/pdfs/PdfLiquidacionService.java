@@ -72,29 +72,27 @@ public class PdfLiquidacionService {
             tablaDesglose.addCell(celdaDescuentos);
 
             // Detalle Ingresos Ordinarios / Descuento IGSS
-            tablaDesglose.addCell(crearCeldaDetalle("Sueldo Base (" + (data.getDiasPendientesPago() != null ? data.getDiasPendientesPago() : 0) + " d)", formatMonto(df, data.getIngresoSueldoBase()), fontNormal));
+            tablaDesglose.addCell(crearCeldaDetalle("Sueldo Base (" + (data.getDiasPendientesPago() != null ? data.getDiasPendientesPago() : 0) + " d)", formatMonto(df, data.getMontoSalarioPendiente() != null ? data.getMontoSalarioPendiente() : data.getIngresoSueldoBase()), fontNormal));
             tablaDesglose.addCell(crearCeldaDetalle("Descuento IGSS", formatMonto(df, data.getDescuentoIgss()), fontNormal));
 
-            tablaDesglose.addCell(crearCeldaDetalle("Bonificación Decreto", formatMonto(df, data.getIngresoBonificacionDecreto()), fontNormal));
+            tablaDesglose.addCell(crearCeldaDetalle("Bonificación Decreto", formatMonto(df, data.getMontoBonificacionDecretoPendiente() != null ? data.getMontoBonificacionDecretoPendiente() : data.getIngresoBonificacionDecreto()), fontNormal));
             tablaDesglose.addCell(crearCeldaDetalle("Descuento ISR", formatMonto(df, data.getDescuentoIsr()), fontNormal));
 
             tablaDesglose.addCell(crearCeldaDetalle("Otros Ingresos", formatMonto(df, data.getIngresoOtrosIngresos()), fontNormal));
             tablaDesglose.addCell(crearCeldaDetalle("Inasistencias", formatMonto(df, data.getDescuentoInasistencias()), fontNormal));
 
             // Prestaciones calculadas (Solo aplican en liquidación)
-            if (data.getMontoAguinaldo() != null && data.getMontoAguinaldo().compareTo(BigDecimal.ZERO) >= 0) {
+            if (data.getMontoAguinaldo() != null && data.getMontoAguinaldo().compareTo(BigDecimal.ZERO) > 0) {
                 tablaDesglose.addCell(crearCeldaDetalle("Aguinaldo Proporcional", formatMonto(df, data.getMontoAguinaldo()), fontNormal));
-            } else {
-                tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal)); // Placeholder
+                tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal));
             }
-            tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal));
 
-            if (data.getMontoBono14() != null && data.getMontoBono14().compareTo(BigDecimal.ZERO) >= 0) {
+            if (data.getMontoBono14() != null && data.getMontoBono14().compareTo(BigDecimal.ZERO) > 0) {
                 tablaDesglose.addCell(crearCeldaDetalle("Bono 14 Proporcional", formatMonto(df, data.getMontoBono14()), fontNormal));
                 tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal));
             }
 
-            if (data.getMontoVacaciones() != null && data.getMontoVacaciones().compareTo(BigDecimal.ZERO) >= 0) {
+            if (data.getMontoVacaciones() != null && data.getMontoVacaciones().compareTo(BigDecimal.ZERO) > 0) {
                 tablaDesglose.addCell(crearCeldaDetalle("Vacaciones Proporcionales", formatMonto(df, data.getMontoVacaciones()), fontNormal));
                 tablaDesglose.addCell(crearCeldaDetalle("", "", fontNormal));
             }
