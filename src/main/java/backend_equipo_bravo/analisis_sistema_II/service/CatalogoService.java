@@ -1,5 +1,6 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
+import backend_equipo_bravo.analisis_sistema_II.dto.ControlMotivoEmpleado;
 import backend_equipo_bravo.analisis_sistema_II.dto.ControlStatusEmpleado;
 import backend_equipo_bravo.analisis_sistema_II.dto.SelectOptionDto;
 import backend_equipo_bravo.analisis_sistema_II.repository.*;
@@ -144,9 +145,9 @@ public class CatalogoService {
 
     public List<SelectOptionDto> getMotivosEgreso() {
         return Arrays.asList(
-            new SelectOptionDto(3, "Renuncia"),
-            new SelectOptionDto(5, "Despido"),
-            new SelectOptionDto(6, "Jubilación")
+            new SelectOptionDto(ControlMotivoEmpleado.RENUNCIA.getId(), ControlMotivoEmpleado.RENUNCIA.getEntityName()),
+            new SelectOptionDto(ControlMotivoEmpleado.DESPIDO.getId(), ControlMotivoEmpleado.DESPIDO.getEntityName()),
+            new SelectOptionDto(ControlMotivoEmpleado.JUBILACION.getId(), ControlMotivoEmpleado.JUBILACION.getEntityName())
         );
     }
 

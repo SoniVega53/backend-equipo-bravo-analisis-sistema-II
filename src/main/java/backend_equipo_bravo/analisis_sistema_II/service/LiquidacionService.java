@@ -1,5 +1,6 @@
 package backend_equipo_bravo.analisis_sistema_II.service;
 
+import backend_equipo_bravo.analisis_sistema_II.dto.ControlMotivoEmpleado;
 import backend_equipo_bravo.analisis_sistema_II.dto.ControlStatusEmpleado;
 import backend_equipo_bravo.analisis_sistema_II.dto.liquidacion.EmpleadoBaseDto;
 import backend_equipo_bravo.analisis_sistema_II.dto.liquidacion.LiquidacionDto;
@@ -22,6 +23,7 @@ import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +43,8 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
     private StatusEmpleadoRepository statusEmpleadoRepository;
     @Autowired
     private FlujoStatusEmpleadoRepository flujoStatusEmpleadoRepository;
+    @Autowired
+    private CatalogoService catalogoService;
 
     @Override
     protected JpaRepository<Liquidacion, Integer> getRepository() {
@@ -158,12 +162,14 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         Integer nuevoStatus = request.getIdStatusEmpleado() != null ? request.getIdStatusEmpleado() : ControlStatusEmpleado.BAJA.getId();
         
         String motivoEgresoStr = request.getMotivoEgreso() != null ? request.getMotivoEgreso().trim() : "";
-        boolean esDespidoMotivo = "5".equals(motivoEgresoStr) || "Despido".equalsIgnoreCase(motivoEgresoStr);
-        String motivoEgresoDB = "Renuncia";
-        if ("5".equals(motivoEgresoStr)) motivoEgresoDB = "Despido";
-        else if ("6".equals(motivoEgresoStr)) motivoEgresoDB = "Jubilación";
-        else if ("3".equals(motivoEgresoStr)) motivoEgresoDB = "Renuncia";
-        else if (!motivoEgresoStr.isEmpty()) motivoEgresoDB = motivoEgresoStr;
+        boolean esDespidoMotivo = String.valueOf(ControlMotivoEmpleado.DESPIDO.getId()).equals(motivoEgresoStr);
+        AtomicReference<String> motivoEgresoDB = new AtomicReference<>("Renuncia");
+
+
+        catalogoService.getMotivosEgreso().stream()
+                .filter(item -> item.getCodigo().toString().equals(String.valueOf(request.getMotivoEgreso())))
+                .findFirst()
+                .ifPresent(item -> motivoEgresoDB.set(item.getValor()));
 
         if (esDespidoMotivo && request.getIdStatusEmpleado() == null) {
             nuevoStatus = ControlStatusEmpleado.DESPEDIDO.getId();
@@ -173,7 +179,7 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         liquidacion.setFechaContratacion(fechaContratacion);
         liquidacion.setFechaEgreso(fechaEgreso);
         liquidacion.setFechaLiquidacion(LocalDate.now());
-        liquidacion.setMotivoEgreso(motivoEgresoDB);
+        liquidacion.setMotivoEgreso(motivoEgresoDB.get());
         liquidacion.setIdPuesto(request.getIdPuesto() != null ? request.getIdPuesto() : empleado.getIdPuesto());
 
         // 1. SET THE RAW BASE COLUMNS EXACTLY AS TYPED IN THE FORM
@@ -247,6 +253,8 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         return mapearADto(crearBase(liquidacion));
     }
 
+
+
     private LiquidacionDto calcularDesglose(BigDecimal salarioBase, LocalDate contratacion, LocalDate egreso, boolean calcIndemnizacion, boolean calcSalario, boolean calcAguinaldo, boolean calcBono14, boolean calcVacaciones) {
         LiquidacionDto dto = new LiquidacionDto();
         
@@ -305,7 +313,7 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         BigDecimal montoSalarioPendiente = BigDecimal.ZERO;
         BigDecimal montoBonoDecreto = BigDecimal.ZERO;
         BigDecimal descuentoIgss = BigDecimal.ZERO;
-        int diasPendientes = egreso.getDayOfMonth();
+        int diasPendientes = Math.min(egreso.getDayOfMonth(), 30);
         if (calcSalario) {
             montoSalarioPendiente = salarioBase.divide(new BigDecimal("30"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasPendientes)).setScale(2, RoundingMode.HALF_UP);
             montoBonoDecreto = new BigDecimal("250").divide(new BigDecimal("30"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasPendientes)).setScale(2, RoundingMode.HALF_UP);
@@ -409,7 +417,7 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
                 desglose.setMontoSalarioPendiente(entidad.getIngresoSueldoBase());
                 desglose.setMontoBonificacionDecretoPendiente(entidad.getIngresoBonificacionDecreto());
                 desglose.setDescuentoIgss(entidad.getDescuentoIgss());
-                desglose.setDiasPendientesPago(null); 
+                // No anulamos los días, mantenemos la variable procesada (topada a 30)
             }
             if (!cInd) { desglose.setMontoIndemnizacion(BigDecimal.ZERO); }
             if (!cAgu) { desglose.setMontoAguinaldo(BigDecimal.ZERO); desglose.setDiasProporcionalesAguinaldo(0); }
