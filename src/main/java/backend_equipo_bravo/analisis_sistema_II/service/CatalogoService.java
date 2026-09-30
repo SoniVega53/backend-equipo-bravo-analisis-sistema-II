@@ -142,6 +142,14 @@ public class CatalogoService {
                 .collect(Collectors.toList());
     }
 
+    public List<SelectOptionDto> getMotivosEgreso() {
+        return Arrays.asList(
+            new SelectOptionDto(3, "Renuncia"),
+            new SelectOptionDto(5, "Despido"),
+            new SelectOptionDto(6, "Jubilación")
+        );
+    }
+
     public List<SelectOptionDto> getDepartamentos() {
         return departamentoRepository.findAll().stream()
                 .map(d -> new SelectOptionDto(d.getIdDepartamento(), d.getNombre()))

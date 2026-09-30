@@ -156,14 +156,24 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         }
 
         Integer nuevoStatus = request.getIdStatusEmpleado() != null ? request.getIdStatusEmpleado() : ControlStatusEmpleado.BAJA.getId();
-        boolean esDespido = nuevoStatus.equals(ControlStatusEmpleado.DESPEDIDO.getId());
-        String motivoEgreso = request.getMotivoEgreso() != null && !request.getMotivoEgreso().isBlank() ? request.getMotivoEgreso() : (esDespido ? "Despido" : "Renuncia");
+        
+        String motivoEgresoStr = request.getMotivoEgreso() != null ? request.getMotivoEgreso().trim() : "";
+        boolean esDespidoMotivo = "5".equals(motivoEgresoStr) || "Despido".equalsIgnoreCase(motivoEgresoStr);
+        String motivoEgresoDB = "Renuncia";
+        if ("5".equals(motivoEgresoStr)) motivoEgresoDB = "Despido";
+        else if ("6".equals(motivoEgresoStr)) motivoEgresoDB = "Jubilación";
+        else if ("3".equals(motivoEgresoStr)) motivoEgresoDB = "Renuncia";
+        else if (!motivoEgresoStr.isEmpty()) motivoEgresoDB = motivoEgresoStr;
+
+        if (esDespidoMotivo && request.getIdStatusEmpleado() == null) {
+            nuevoStatus = ControlStatusEmpleado.DESPEDIDO.getId();
+        }
 
         liquidacion.setIdEmpleado(empleado.getIdEmpleado());
         liquidacion.setFechaContratacion(fechaContratacion);
         liquidacion.setFechaEgreso(fechaEgreso);
         liquidacion.setFechaLiquidacion(LocalDate.now());
-        liquidacion.setMotivoEgreso(motivoEgreso);
+        liquidacion.setMotivoEgreso(motivoEgresoDB);
         liquidacion.setIdPuesto(request.getIdPuesto() != null ? request.getIdPuesto() : empleado.getIdPuesto());
 
         // 1. SET THE RAW BASE COLUMNS EXACTLY AS TYPED IN THE FORM
@@ -190,10 +200,9 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         if (request.getCalcularVacaciones() != null) {
             calcVacaciones = request.getCalcularVacaciones().toString().equalsIgnoreCase("true");
         }
-        boolean calcIndemnizacion = esDespido;
-        if (request.getCalcularIndemnizacion() != null) {
-            calcIndemnizacion = request.getCalcularIndemnizacion().toString().equalsIgnoreCase("true") && esDespido;
-        }
+        
+        boolean flagManualIndemnizacion = request.getCalcularIndemnizacion() != null && request.getCalcularIndemnizacion().toString().equalsIgnoreCase("true");
+        boolean calcIndemnizacion = esDespidoMotivo && flagManualIndemnizacion;
 
         LiquidacionDto calculosTemporales = calcularDesglose(liquidacion.getIngresoSueldoBase(), fechaContratacion, fechaEgreso, calcIndemnizacion, calcSalario, calcAguinaldo, calcBono14, calcVacaciones);
         
@@ -241,7 +250,7 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
     private LiquidacionDto calcularDesglose(BigDecimal salarioBase, LocalDate contratacion, LocalDate egreso, boolean calcIndemnizacion, boolean calcSalario, boolean calcAguinaldo, boolean calcBono14, boolean calcVacaciones) {
         LiquidacionDto dto = new LiquidacionDto();
         
-        int diasTotales = (int) ChronoUnit.DAYS.between(contratacion, egreso);
+        int diasTotales = (int) ChronoUnit.DAYS.between(contratacion, egreso) + 1;
         if (diasTotales < 0) diasTotales = 0;
         dto.setDiasLaboradosTotal(diasTotales);
 
@@ -259,7 +268,7 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         if (calcAguinaldo) {
             LocalDate inicioAguinaldo = egreso.getMonthValue() == 12 ? LocalDate.of(egreso.getYear(), 12, 1) : LocalDate.of(egreso.getYear() - 1, 12, 1);
             if (inicioAguinaldo.isBefore(contratacion)) inicioAguinaldo = contratacion;
-            diasAguinaldo = (int) ChronoUnit.DAYS.between(inicioAguinaldo, egreso);
+            diasAguinaldo = (int) ChronoUnit.DAYS.between(inicioAguinaldo, egreso) + 1;
             if(diasAguinaldo < 0) diasAguinaldo = 0;
             montoAguinaldo = salarioBase.divide(new BigDecimal("365"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasAguinaldo)).setScale(2, RoundingMode.HALF_UP);
         }
@@ -272,7 +281,7 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         if (calcBono14) {
             LocalDate inicioBono14 = egreso.getMonthValue() >= 7 ? LocalDate.of(egreso.getYear(), 7, 1) : LocalDate.of(egreso.getYear() - 1, 7, 1);
             if (inicioBono14.isBefore(contratacion)) inicioBono14 = contratacion;
-            diasBono14 = (int) ChronoUnit.DAYS.between(inicioBono14, egreso);
+            diasBono14 = (int) ChronoUnit.DAYS.between(inicioBono14, egreso) + 1;
             if(diasBono14 < 0) diasBono14 = 0;
             montoBono14 = salarioBase.divide(new BigDecimal("365"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasBono14)).setScale(2, RoundingMode.HALF_UP);
         }
@@ -285,7 +294,7 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         if (calcVacaciones) {
             int aniosCompletos = Period.between(contratacion, egreso).getYears();
             LocalDate ultimoAniversario = contratacion.plusYears(aniosCompletos);
-            diasVacaciones = (int) ChronoUnit.DAYS.between(ultimoAniversario, egreso);
+            diasVacaciones = (int) ChronoUnit.DAYS.between(ultimoAniversario, egreso) + 1;
             if(diasVacaciones < 0) diasVacaciones = 0;
             montoVacaciones = salarioBase.divide(new BigDecimal("30"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal("15")).multiply(new BigDecimal(diasVacaciones)).divide(new BigDecimal("365"), 2, RoundingMode.HALF_UP);
         }
