@@ -111,7 +111,12 @@ public class CatalogoController extends BaseController {
 
     @GetMapping("/empleados")
     public ResponseEntity<?> getEmpleados() {
-        return success(catalogoService.getEmpleados(), SuccessCode.GENERAL);
+        return success(catalogoService.getEmpleados(true), SuccessCode.GENERAL);
+    }
+
+    @GetMapping("/empleados/status")
+    public ResponseEntity<?> getEmpleadosStatus() {
+        return success(catalogoService.getEmpleados(false), SuccessCode.GENERAL);
     }
 
     @GetMapping("/periodos-planilla")
