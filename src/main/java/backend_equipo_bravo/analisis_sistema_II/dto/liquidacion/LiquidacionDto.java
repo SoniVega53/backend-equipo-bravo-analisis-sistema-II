@@ -20,6 +20,8 @@ public class LiquidacionDto {
     private String nombreDepartamento;
     private Integer idStatusEmpleado;
     private String nombreStatus;
+
+    // Campos de la base de datos
     private BigDecimal ingresoSueldoBase;
     private BigDecimal ingresoBonificacionDecreto;
     private BigDecimal ingresoOtrosIngresos;
@@ -31,4 +33,24 @@ public class LiquidacionDto {
     private BigDecimal totalDescuentos;
     private BigDecimal totalNeto;
     private LocalDateTime fechaCreacion;
+
+    // Opciones de cálculo automático
+    private Boolean calcularSalarioPendiente = true;
+    private Boolean calcularAguinaldo = true;
+    private Boolean calcularBono14 = true;
+    private Boolean calcularVacaciones = true;
+    private Boolean calcularIndemnizacion = true;
+
+    // Campos calculados en tiempo de ejecución (Desglose Guatemala)
+    private Integer diasLaboradosTotal;
+    private BigDecimal montoIndemnizacion;
+    private Integer diasProporcionalesAguinaldo;
+    private BigDecimal montoAguinaldo;
+    private Integer diasProporcionalesBono14;
+    private BigDecimal montoBono14;
+    private Integer diasProporcionalesVacaciones;
+    private BigDecimal montoVacaciones;
+    private Integer diasPendientesPago;
+    private BigDecimal montoSalarioPendiente;
+    private BigDecimal montoBonificacionDecretoPendiente;
 }
