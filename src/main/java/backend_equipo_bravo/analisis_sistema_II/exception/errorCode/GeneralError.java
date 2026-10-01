@@ -23,6 +23,7 @@ public enum GeneralError {
 
     INASISTENCIA_PROCESS(1401, "INASISTENCIA_PROCESS", "No se puede eliminar una inasistencia que ya ha sido procesada en la planilla.", ""),
 
+    PERIODO_PLANILLA_ALREADY_EXISTS(400, "PERIODO_PLANILLA_ALREADY_EXISTS", "El periodo de planilla ya existe.", "Ya existe un periodo de planilla registrado para el año y mes especificados."),
 
     RANGO_FECHAS_INVALIDO(400, "RANGO_FECHAS_INVALIDO", "Rango de fechas inválido.", "La fecha final no puede ser anterior a la fecha inicial."),
     SOLAPAMIENTO_INASISTENCIA(400, "SOLAPAMIENTO_INASISTENCIA", "Conflicto de fechas.", "El empleado ya posee una inasistencia registrada que se cruza con el rango seleccionado."),
