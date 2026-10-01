@@ -8,6 +8,7 @@ import backend_equipo_bravo.analisis_sistema_II.entity.*;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.GeneralError;
 import backend_equipo_bravo.analisis_sistema_II.repository.*;
+import jakarta.persistence.Column;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,10 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
     @Autowired
     private PuestoRepository puestoRepository;
 
+
+    private LocalDateTime fechaCreacion;
+    private String usuarioCreacion;
+
     @Override
     @SuppressWarnings("unchecked")
     protected JpaRepository<PlanillaCabecera, Object> getRepository() {
@@ -67,6 +72,11 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
             validarAlta();
 
         if (request.getForzarRecalculo()) {
+            PlanillaCabecera planillaCabecera = planillaCabeceraRepository.findByAnioAndMes(request.getAnio(), request.getMes())
+                    .orElseThrow(() -> new BusinessException(GeneralError.PLANILLA_NOT_FOUND));
+            fechaCreacion = planillaCabecera.getFechaCreacion();
+            usuarioCreacion = planillaCabecera.getUsuarioCreacion();
+
             planillaDetalleRepository.deleteByAnioAndMes(request.getAnio(), request.getMes());
             planillaCabeceraRepository.deleteByAnioAndMes(request.getAnio(), request.getMes());
         } else {
@@ -107,6 +117,8 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
         if (isUpdate){
             cabecera.setFechaModificacion(LocalDateTime.now());
             cabecera.setUsuarioModificacion(obtenerUsuarioAutenticado());
+            cabecera.setFechaCreacion(fechaCreacion);
+            cabecera.setUsuarioCreacion(usuarioCreacion);
         }else {
             cabecera.setFechaCreacion(LocalDateTime.now());
             cabecera.setUsuarioCreacion(obtenerUsuarioAutenticado());
@@ -174,6 +186,8 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
             if (isUpdate){
                 detalle.setFechaModificacion(LocalDateTime.now());
                 detalle.setUsuarioModificacion(obtenerUsuarioAutenticado());
+                detalle.setFechaCreacion(fechaCreacion);
+                detalle.setUsuarioCreacion(usuarioCreacion);
             }else{
                 detalle.setFechaCreacion(LocalDateTime.now());
                 detalle.setUsuarioCreacion(obtenerUsuarioAutenticado());

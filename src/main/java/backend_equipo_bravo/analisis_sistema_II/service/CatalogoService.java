@@ -182,8 +182,10 @@ public class CatalogoService {
                 .collect(Collectors.toList());
     }
 
-    public List<SelectOptionDto> getEmpleados() {
+    public List<SelectOptionDto> getEmpleados(boolean isAllEmpleados) {
         return empleadoRepository.findAll().stream()
+                .filter(e-> !(!isAllEmpleados && (e.getIdStatusEmpleado() == ControlStatusEmpleado.BAJA.getId() ||
+                        e.getIdStatusEmpleado() == ControlStatusEmpleado.DESPEDIDO.getId())))
                 .map(e -> {
                     String nombreCompleto = personaRepository.findById(e.getIdPersona())
                             .map(p -> p.getNombre() + " " + p.getApellido())
