@@ -79,7 +79,7 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
 
             planillaDetalleRepository.deleteByAnioAndMes(request.getAnio(), request.getMes());
             planillaCabeceraRepository.deleteByAnioAndMes(request.getAnio(), request.getMes());
-        } else {
+        } else if (request.getIsFind()){
             PlanillaCabecera cabeceraExistente = planillaCabeceraRepository.findByAnioAndMes(request.getAnio(), request.getMes())
                     .orElseThrow(() -> new BusinessException(GeneralError.PLANILLA_NOT_FOUND));
 
