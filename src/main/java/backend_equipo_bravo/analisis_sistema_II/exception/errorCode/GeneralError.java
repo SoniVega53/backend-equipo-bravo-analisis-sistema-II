@@ -29,6 +29,11 @@ public enum GeneralError {
     SOLAPAMIENTO_INASISTENCIA(400, "SOLAPAMIENTO_INASISTENCIA", "Conflicto de fechas.", "El empleado ya posee una inasistencia registrada que se cruza con el rango seleccionado."),
     TRANSICION_STATUS_INVALIDA(400, "TRANSICION_STATUS_INVALIDA", "Transición de estatus no permitida.", "El cambio de estatus no corresponde a una transición permitida en el flujo de estados."),
 
+    ESTADO_CIVIL_NOT_FOUND(404, "ESTADO_CIVIL_NOT_FOUND", "El estado civil no existe.", ""),
+    DEPARTAMENTO_NOT_FOUND(404, "DEPARTAMENTO_NOT_FOUND", "El departamento no existe.", ""),
+    EMPRESA_NOT_FOUND_CATALOGO(404, "EMPRESA_NOT_FOUND_CATALOGO", "La empresa seleccionada no existe.", ""),
+    NOMBRE_INVALIDO(400, "NOMBRE_INVALIDO", "El nombre es obligatorio y no puede superar 50 caracteres.", ""),
+
     ERROR_DEPENDENCY(409, "ERROR_DEPENDENCY", "El registro no se puede eliminar porque está siendo utilizado en otra parte del sistema.", "");
 
     private final int codigoNumerico;
