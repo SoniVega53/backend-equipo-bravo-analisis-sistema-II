@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.slf4j.Logger;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -58,9 +55,16 @@ public class AuthController extends BaseController {
                     e.getMessage(),
                     HttpStatus.UNAUTHORIZED
             );
+        } catch (Exception e) {
+            e.printStackTrace(); // Imprime la traza completa del error en la consola de Spring Boot
+            return error(
+                    500,
+                    "ERROR_INTERNO",
+                    "Error inesperado al autenticar: " + e.getMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
         }
     }
-
 
     @GetMapping("/recuperacion/pregunta/{idUsuario}")
     public ResponseEntity<?> obtenerPreguntaRecuperacion(@PathVariable String idUsuario, HttpServletRequest requestHttp) {
