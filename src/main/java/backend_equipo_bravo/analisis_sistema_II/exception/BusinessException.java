@@ -43,6 +43,13 @@ public class BusinessException extends RuntimeException {
         this.codigoTexto = error.getCodigoTexto();
     }
 
+    // Constructor para errores generales con un mensaje de detalle (validaciones)
+    public BusinessException(GeneralError error, String detalle) {
+        super(detalle);
+        this.codigoNumerico = error.getCodigoNumerico();
+        this.codigoTexto = error.getCodigoTexto();
+    }
+
     public int getCodigoNumerico() {
         return codigoNumerico;
     }

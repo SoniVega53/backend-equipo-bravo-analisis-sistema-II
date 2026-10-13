@@ -10,6 +10,8 @@ public enum GeneralError {
     ERROR_PERSONA_NOT_FOUND(402, "ERROR_PERSONA_NOT_FOUND", "Persona no existe.", ""),
     ERROR_PUESTO_NOT_FOUND(402, "ERROR_PUESTO_NOT_FOUND", "Puesto no existe.", ""),
     ERROR_STATUS_NOT_FOUND(402, "ERROR_STATUS_NOT_FOUND", "estado no existe.", ""),
+    BANCO_NOT_FOUND(404, "BANCO_NOT_FOUND", "El banco no existe.", ""),
+    VALIDACION_DATOS(400, "VALIDACION_DATOS", "Los datos enviados no son válidos.", ""),
 
     STATUS_USER_NOT_FOUND(201, "STATUS_USER_NOT_FOUND", "El estatus de usuario no existe.", "El ID de estatus proporcionado no se encuentra registrado."),
 
