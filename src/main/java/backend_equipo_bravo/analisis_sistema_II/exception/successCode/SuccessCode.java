@@ -55,7 +55,22 @@ public enum SuccessCode {
     TIPO_ACCESO_SUCCESS(200, "TIPO_ACCESO_SUCCESS", "Tipo de acceso creado Correctamente."),
     TIPO_ACCESO_GENERAL(200, "TIPO_ACCESO_GENERAL", "Consulta Exitosa."),
     TIPO_ACCESO_UPDATED_SUCCESS(200, "TIPO_ACCESO_UPDATED_SUCCESS", "Tipo de acceso actualizado Correctamente."),
-    TIPO_ACCESO_DELETED_SUCCESS(200, "TIPO_ACCESO_DELETED_SUCCESS", "Tipo de acceso eliminado Correctamente.");
+    TIPO_ACCESO_DELETED_SUCCESS(200, "TIPO_ACCESO_DELETED_SUCCESS", "Tipo de acceso eliminado Correctamente."),
+
+    ESTADO_CIVIL_SUCCESS(200, "ESTADO_CIVIL_SUCCESS", "Estado civil creado Correctamente."),
+    ESTADO_CIVIL_GENERAL(200, "ESTADO_CIVIL_GENERAL", "Consulta Exitosa."),
+    ESTADO_CIVIL_UPDATED_SUCCESS(200, "ESTADO_CIVIL_UPDATED_SUCCESS", "Estado civil actualizado Correctamente."),
+    ESTADO_CIVIL_DELETED_SUCCESS(200, "ESTADO_CIVIL_DELETED_SUCCESS", "Estado civil eliminado Correctamente."),
+
+    DEPARTAMENTO_SUCCESS(200, "DEPARTAMENTO_SUCCESS", "Departamento creado Correctamente."),
+    DEPARTAMENTO_GENERAL(200, "DEPARTAMENTO_GENERAL", "Consulta Exitosa."),
+    DEPARTAMENTO_UPDATED_SUCCESS(200, "DEPARTAMENTO_UPDATED_SUCCESS", "Departamento actualizado Correctamente."),
+    DEPARTAMENTO_DELETED_SUCCESS(200, "DEPARTAMENTO_DELETED_SUCCESS", "Departamento eliminado Correctamente."),
+
+    PUESTO_SUCCESS(200, "PUESTO_SUCCESS", "Puesto creado Correctamente."),
+    PUESTO_GENERAL(200, "PUESTO_GENERAL", "Consulta Exitosa."),
+    PUESTO_UPDATED_SUCCESS(200, "PUESTO_UPDATED_SUCCESS", "Puesto actualizado Correctamente."),
+    PUESTO_DELETED_SUCCESS(200, "PUESTO_DELETED_SUCCESS", "Puesto eliminado Correctamente.");
 
     private final int codigoNumerico;
     private final String codigoTexto;
