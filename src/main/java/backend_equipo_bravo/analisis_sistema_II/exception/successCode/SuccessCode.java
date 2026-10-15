@@ -55,7 +55,14 @@ public enum SuccessCode {
     TIPO_ACCESO_SUCCESS(200, "TIPO_ACCESO_SUCCESS", "Tipo de acceso creado Correctamente."),
     TIPO_ACCESO_GENERAL(200, "TIPO_ACCESO_GENERAL", "Consulta Exitosa."),
     TIPO_ACCESO_UPDATED_SUCCESS(200, "TIPO_ACCESO_UPDATED_SUCCESS", "Tipo de acceso actualizado Correctamente."),
-    TIPO_ACCESO_DELETED_SUCCESS(200, "TIPO_ACCESO_DELETED_SUCCESS", "Tipo de acceso eliminado Correctamente.");
+    TIPO_ACCESO_DELETED_SUCCESS(200, "TIPO_ACCESO_DELETED_SUCCESS", "Tipo de acceso eliminado Correctamente."),     
+    
+    TIPO_DOCUMENTO_SUCCESS(200, "TIPO_DOCUMENTO_SUCCESS", "Tipo de documento creado correctamente."),
+    TIPO_DOCUMENTO_GENERAL(200, "TIPO_DOCUMENTO_GENERAL", "Consulta exitosa."),
+    TIPO_DOCUMENTO_UPDATED_SUCCESS(200, "TIPO_DOCUMENTO_UPDATED_SUCCESS", "Tipo de documento actualizado correctamente."),
+    TIPO_DOCUMENTO_DELETED_SUCCESS(200, "TIPO_DOCUMENTO_DELETED_SUCCESS", "Tipo de documento eliminado correctamente.");
+
+    
 
     private final int codigoNumerico;
     private final String codigoTexto;
