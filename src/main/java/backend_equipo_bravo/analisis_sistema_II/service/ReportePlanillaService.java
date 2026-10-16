@@ -35,6 +35,11 @@ public class ReportePlanillaService extends BaseService<PlanillaCabecera, Object
     }
 
     @Override
+    protected Integer getIdOpcion() {
+        return 3;
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     protected JpaRepository<PlanillaCabecera, Object> getRepository() {
         return (JpaRepository<PlanillaCabecera, Object>) (JpaRepository<?, ?>) planillaCabeceraRepository;
