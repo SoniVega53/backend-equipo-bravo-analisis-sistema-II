@@ -82,7 +82,14 @@ public enum SuccessCode {
     PUESTO_SUCCESS(200, "PUESTO_SUCCESS", "Puesto creado Correctamente."),
     PUESTO_GENERAL(200, "PUESTO_GENERAL", "Consulta Exitosa."),
     PUESTO_UPDATED_SUCCESS(200, "PUESTO_UPDATED_SUCCESS", "Puesto actualizado Correctamente."),
-    PUESTO_DELETED_SUCCESS(200, "PUESTO_DELETED_SUCCESS", "Puesto eliminado Correctamente.");
+    PUESTO_DELETED_SUCCESS(200, "PUESTO_DELETED_SUCCESS", "Puesto eliminado Correctamente."),
+
+    TIPO_DOCUMENTO_SUCCESS(200, "TIPO_DOCUMENTO_SUCCESS", "Tipo de documento creado correctamente."),
+    TIPO_DOCUMENTO_GENERAL(200, "TIPO_DOCUMENTO_GENERAL", "Consulta exitosa."),
+    TIPO_DOCUMENTO_UPDATED_SUCCESS(200, "TIPO_DOCUMENTO_UPDATED_SUCCESS", "Tipo de documento actualizado correctamente."),
+    TIPO_DOCUMENTO_DELETED_SUCCESS(200, "TIPO_DOCUMENTO_DELETED_SUCCESS", "Tipo de documento eliminado correctamente.");
+
+
 
     private final int codigoNumerico;
     private final String codigoTexto;
