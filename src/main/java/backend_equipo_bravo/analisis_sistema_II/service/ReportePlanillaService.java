@@ -35,11 +35,6 @@ public class ReportePlanillaService extends BaseService<PlanillaCabecera, Object
     }
 
     @Override
-    protected Integer getIdOpcion() {
-        return 3;
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     protected JpaRepository<PlanillaCabecera, Object> getRepository() {
         return (JpaRepository<PlanillaCabecera, Object>) (JpaRepository<?, ?>) planillaCabeceraRepository;
@@ -59,7 +54,7 @@ public class ReportePlanillaService extends BaseService<PlanillaCabecera, Object
         return construirRespuestaDesdeBase(cabecera);
     }
 
-    private PlanillaResponseDto construirRespuestaDesdeBase(PlanillaCabecera cabecera) {
+    public PlanillaResponseDto construirRespuestaDesdeBase(PlanillaCabecera cabecera) {
         List<PlanillaDetalle> detallesEntity = planillaDetalleRepository.findByAnioAndMes(cabecera.getAnio(), cabecera.getMes());
 
         List<PlanillaDetalleDto> detallesDto = detallesEntity.stream().map(d -> {

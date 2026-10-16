@@ -6,7 +6,7 @@ import backend_equipo_bravo.analisis_sistema_II.dto.planilla.PlanillaResponseDto
 import backend_equipo_bravo.analisis_sistema_II.dto.planilla.ReportePlanillaRequestDto;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.GeneralError;
-import backend_equipo_bravo.analisis_sistema_II.service.ReportePlanillaService;
+import backend_equipo_bravo.analisis_sistema_II.service.BoletaPlanillaService;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -29,7 +29,7 @@ public class PdfBoletaPagoService {
     };
 
     @Autowired
-    private ReportePlanillaService reportePlanillaService;
+    private BoletaPlanillaService reportePlanillaService;
 
     public byte[] generarPdf(BoletaPagoRequestDto request) {
         ReportePlanillaRequestDto reportRequest = new ReportePlanillaRequestDto();

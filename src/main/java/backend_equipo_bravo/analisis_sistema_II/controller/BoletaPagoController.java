@@ -1,7 +1,10 @@
 package backend_equipo_bravo.analisis_sistema_II.controller;
 
 import backend_equipo_bravo.analisis_sistema_II.dto.planilla.BoletaPagoRequestDto;
+import backend_equipo_bravo.analisis_sistema_II.dto.planilla.ReportePlanillaRequestDto;
 import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
+import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCode;
+import backend_equipo_bravo.analisis_sistema_II.service.BoletaPlanillaService;
 import backend_equipo_bravo.analisis_sistema_II.service.pdfs.PdfBoletaPagoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +19,9 @@ public class BoletaPagoController extends BaseController {
 
     @Autowired
     private PdfBoletaPagoService pdfBoletaPagoService;
+
+    @Autowired
+    private BoletaPlanillaService boletaPlanillaService;
 
     @PostMapping(value = "/generar-pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> generarPdf(@RequestBody BoletaPagoRequestDto request) {
@@ -34,6 +40,15 @@ public class BoletaPagoController extends BaseController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/generar")
+    public ResponseEntity<?> generarReporte(@RequestBody ReportePlanillaRequestDto request) {
+        try {
+            return success(boletaPlanillaService.obtenerReporte(request), SuccessCode.GENERAL);
+        } catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }
