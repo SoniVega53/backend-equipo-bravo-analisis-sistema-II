@@ -6,5 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DocumentoPersonaRepository extends JpaRepository<DocumentoPersona, DocumentoPersonaId> {
+public interface DocumentoPersonaRepository
+        extends JpaRepository<DocumentoPersona, DocumentoPersonaId> {
+
+    boolean existsByIdTipoDocumentoAndIdPersona(
+            Integer idTipoDocumento,
+            Integer idPersona
+    );
 }

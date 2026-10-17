@@ -40,6 +40,11 @@ public enum SuccessCode {
     STATUS_EMPLEADO_DELETED_SUCCESS(200, "STATUS_EMPLEADO_DELETED_SUCCESS", "Estatus de empleado eliminado correctamente."),
 
    
+    CUENTA_BANCARIA_EMPLEADO_SUCCESS(200, "CUENTA_BANCARIA_EMPLEADO_SUCCESS", "Cuenta bancaria de empleado creada correctamente."),
+    CUENTA_BANCARIA_EMPLEADO_GENERAL(200, "CUENTA_BANCARIA_EMPLEADO_GENERAL", "Consulta exitosa."),
+    CUENTA_BANCARIA_EMPLEADO_UPDATED_SUCCESS(200, "CUENTA_BANCARIA_EMPLEADO_UPDATED_SUCCESS", "Cuenta bancaria de empleado actualizada correctamente."),
+    CUENTA_BANCARIA_EMPLEADO_DELETED_SUCCESS(200, "CUENTA_BANCARIA_EMPLEADO_DELETED_SUCCESS", "Cuenta bancaria de empleado eliminada correctamente."),
+
     ROLE_GENERAL(200, "ROLE_GENERAL", "Operación de rol realizada con éxito."),
     ROLE_SUCCESS(201, "ROLE_SUCCESS", "Rol creado exitosamente."),
     ROLE_UPDATED_SUCCESS(200, "ROLE_UPDATED_SUCCESS", "Rol actualizado exitosamente."),
