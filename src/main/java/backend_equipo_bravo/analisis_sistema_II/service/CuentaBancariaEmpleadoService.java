@@ -85,10 +85,10 @@ public class CuentaBancariaEmpleadoService
             );
         }
 
-        if (request.getActiva() != 'S' && request.getActiva() != 'N') {
-            throw new IllegalArgumentException(
-                    "El estado de la cuenta debe ser S o N."
-            );
-        }
+//        if (request.getActiva() != 'S' && request.getActiva() != 'N') {
+//            throw new IllegalArgumentException(
+//                    "El estado de la cuenta debe ser S o N."
+//            );
+//        }
     }
 }
