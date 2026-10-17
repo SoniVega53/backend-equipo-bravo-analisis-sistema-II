@@ -1,65 +1,75 @@
-
 package backend_equipo_bravo.analisis_sistema_II.controller;
 
 import backend_equipo_bravo.analisis_sistema_II.dto.documentopersona.DocumentoPersonaRequest;
-import backend_equipo_bravo.analisis_sistema_II.entity.DocumentoPersona;
 import backend_equipo_bravo.analisis_sistema_II.entity.serializables.DocumentoPersonaId;
+import backend_equipo_bravo.analisis_sistema_II.exception.BusinessException;
+import backend_equipo_bravo.analisis_sistema_II.exception.successCode.SuccessCode;
 import backend_equipo_bravo.analisis_sistema_II.service.DocumentoPersonaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/console/documentos-personas")
-public class DocumentoPersonaController {
+public class DocumentoPersonaController extends BaseController {
 
     @Autowired
     private DocumentoPersonaService documentoPersonaService;
 
     @GetMapping
-    public List<DocumentoPersona> listarTodos() {
-        return documentoPersonaService.buscarTodosPermisos();
+    public ResponseEntity<?> listarTodos() {
+        try {
+            return success(documentoPersonaService.buscarTodosPermisos(), SuccessCode.GENERAL);
+        } catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/{idTipoDocumento}/{idPersona}")
-    public DocumentoPersona buscarPorId(
+    public ResponseEntity<?> buscarPorId(
             @PathVariable Integer idTipoDocumento,
             @PathVariable Integer idPersona) {
-
-        DocumentoPersonaId id =
-                new DocumentoPersonaId(idTipoDocumento, idPersona);
-
-        return documentoPersonaService.buscarPorIdPermisos(id);
+        try {
+            DocumentoPersonaId id = new DocumentoPersonaId(idTipoDocumento, idPersona);
+            return success(documentoPersonaService.buscarPorIdPermisos(id), SuccessCode.GENERAL);
+        } catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping
-    public DocumentoPersona crear(
+    public ResponseEntity<?> crear(
             @RequestBody DocumentoPersonaRequest request) {
-
-        return documentoPersonaService.crear(request);
+        try {
+            return success(documentoPersonaService.crear(request), SuccessCode.GENERAL);
+        } catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/{idTipoDocumento}/{idPersona}")
-    public DocumentoPersona actualizar(
+    public ResponseEntity<?> actualizar(
             @PathVariable Integer idTipoDocumento,
             @PathVariable Integer idPersona,
             @RequestBody DocumentoPersonaRequest request) {
-
-        DocumentoPersonaId id =
-                new DocumentoPersonaId(idTipoDocumento, idPersona);
-
-        return documentoPersonaService.actualizar(id, request);
+        try {
+            DocumentoPersonaId id = new DocumentoPersonaId(idTipoDocumento, idPersona);
+            return success(documentoPersonaService.actualizar(id, request), SuccessCode.GENERAL);
+        } catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @DeleteMapping("/{idTipoDocumento}/{idPersona}")
-    public String eliminar(
+    public ResponseEntity<?> eliminar(
             @PathVariable Integer idTipoDocumento,
             @PathVariable Integer idPersona) {
-
-        DocumentoPersonaId id =
-                new DocumentoPersonaId(idTipoDocumento, idPersona);
-
-        return documentoPersonaService.eliminar(id);
+        try {
+            DocumentoPersonaId id = new DocumentoPersonaId(idTipoDocumento, idPersona);
+            return success(documentoPersonaService.eliminarBasePermisos(id), SuccessCode.GENERAL);
+        } catch (BusinessException e) {
+            return error(e.getCodigoNumerico(), e.getCodigoTexto(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 }
