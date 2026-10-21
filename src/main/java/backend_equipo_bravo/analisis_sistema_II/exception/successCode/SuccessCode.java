@@ -45,13 +45,16 @@ public enum SuccessCode {
     STATUS_USUARIO_UPDATED_SUCCESS(200, "STATUS_USUARIO_UPDATED_SUCCESS", "Estatus de usuario actualizado correctamente."),
     STATUS_USUARIO_DELETED_SUCCESS(200, "STATUS_USUARIO_DELETED_SUCCESS", "Estatus de usuario eliminado correctamente."),
 
-   
     STATUS_EMPLEADO_SUCCESS(200, "STATUS_EMPLEADO_SUCCESS", "Estatus de empleado creado correctamente."),
     STATUS_EMPLEADO_GENERAL(200, "STATUS_EMPLEADO_GENERAL", "Consulta exitosa."),
     STATUS_EMPLEADO_UPDATED_SUCCESS(200, "STATUS_EMPLEADO_UPDATED_SUCCESS", "Estatus de empleado actualizado correctamente."),
     STATUS_EMPLEADO_DELETED_SUCCESS(200, "STATUS_EMPLEADO_DELETED_SUCCESS", "Estatus de empleado eliminado correctamente."),
 
-   
+    FLUJO_STATUS_EMPLEADO_SUCCESS(200, "FLUJO_STATUS_EMPLEADO_SUCCESS", "Flujo de estatus de empleado creado correctamente."),
+    FLUJO_STATUS_EMPLEADO_GENERAL(200, "FLUJO_STATUS_EMPLEADO_GENERAL", "Consulta exitosa."),
+    FLUJO_STATUS_EMPLEADO_UPDATED_SUCCESS(200, "FLUJO_STATUS_EMPLEADO_UPDATED_SUCCESS", "Flujo de estatus de empleado actualizado correctamente."),
+    FLUJO_STATUS_EMPLEADO_DELETED_SUCCESS(200, "FLUJO_STATUS_EMPLEADO_DELETED_SUCCESS", "Flujo de estatus de empleado eliminado correctamente."),
+
     CUENTA_BANCARIA_EMPLEADO_SUCCESS(200, "CUENTA_BANCARIA_EMPLEADO_SUCCESS", "Cuenta bancaria de empleado creada correctamente."),
     CUENTA_BANCARIA_EMPLEADO_GENERAL(200, "CUENTA_BANCARIA_EMPLEADO_GENERAL", "Consulta exitosa."),
     CUENTA_BANCARIA_EMPLEADO_UPDATED_SUCCESS(200, "CUENTA_BANCARIA_EMPLEADO_UPDATED_SUCCESS", "Cuenta bancaria de empleado actualizada correctamente."),
@@ -100,8 +103,6 @@ public enum SuccessCode {
     TIPO_DOCUMENTO_GENERAL(200, "TIPO_DOCUMENTO_GENERAL", "Consulta exitosa."),
     TIPO_DOCUMENTO_UPDATED_SUCCESS(200, "TIPO_DOCUMENTO_UPDATED_SUCCESS", "Tipo de documento actualizado correctamente."),
     TIPO_DOCUMENTO_DELETED_SUCCESS(200, "TIPO_DOCUMENTO_DELETED_SUCCESS", "Tipo de documento eliminado correctamente.");
-
-
 
     private final int codigoNumerico;
     private final String codigoTexto;

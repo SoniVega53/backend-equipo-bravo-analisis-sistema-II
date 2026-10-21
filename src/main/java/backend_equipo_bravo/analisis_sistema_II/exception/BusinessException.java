@@ -1,6 +1,7 @@
 package backend_equipo_bravo.analisis_sistema_II.exception;
 
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.EmpresaError;
+import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.FlujoStatusEmpleadoError;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.GeneralError;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.SucursalError;
 import backend_equipo_bravo.analisis_sistema_II.exception.errorCode.UsuarioError;
@@ -24,6 +25,13 @@ public class BusinessException extends RuntimeException {
 
     // Constructor para errores de Empresa
     public BusinessException(EmpresaError error) {
+        super(error.getMensaje());
+        this.codigoNumerico = error.getCodigoNumerico();
+        this.codigoTexto = error.getCodigoTexto();
+    }
+
+    // Constructor para errores de FlujoStatusEmpleado
+    public BusinessException(FlujoStatusEmpleadoError error) {
         super(error.getMensaje());
         this.codigoNumerico = error.getCodigoNumerico();
         this.codigoTexto = error.getCodigoTexto();
