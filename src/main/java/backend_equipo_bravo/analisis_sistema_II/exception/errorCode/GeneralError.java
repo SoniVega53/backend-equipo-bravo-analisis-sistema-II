@@ -29,6 +29,7 @@ public enum GeneralError {
 
     RANGO_FECHAS_INVALIDO(400, "RANGO_FECHAS_INVALIDO", "Rango de fechas inválido.", "La fecha final no puede ser anterior a la fecha inicial."),
     SOLAPAMIENTO_INASISTENCIA(400, "SOLAPAMIENTO_INASISTENCIA", "Conflicto de fechas.", "El empleado ya posee una inasistencia registrada que se cruza con el rango seleccionado."),
+    INASISTENCIA_PREVIA_CONTRATACION(400, "INASISTENCIA_PREVIA_CONTRATACION", "Fecha de inasistencia inválida: No se pueden registrar inasistencias en fechas anteriores a la fecha de contratación del empleado.", ""),
     TRANSICION_STATUS_INVALIDA(400, "TRANSICION_STATUS_INVALIDA", "Transición de estatus no permitida.", "El cambio de estatus no corresponde a una transición permitida en el flujo de estados."),
 
     ESTADO_CIVIL_NOT_FOUND(404, "ESTADO_CIVIL_NOT_FOUND", "El estado civil no existe.", ""),
