@@ -14,6 +14,18 @@ public enum SuccessCode {
     USER_AUTH_SUCCESS(203, "USER_AUTH_SUCCESS", "Consulta exitosa."),
     MENU_AUTH_SUCCESS(204, "MENU_AUTH_SUCCESS", "Consulta exitosa."),
     SUCURSAL_DELETED_SUCCESS(200, "SUCURSAL_DELETED_SUCCESS", "La sucursal fue eliminada correctamente."),
+    BANCO_SUCCESS(200, "BANCO_SUCCESS", "Banco creado Correctamente."),
+    BANCO_GENERAL(200, "BANCO_GENERAL", "Consulta Exitosa."),
+    BANCO_UPDATED_SUCCESS(200, "BANCO_UPDATED_SUCCESS", "Banco actualizado Correctamente."),
+    BANCO_DELETED_SUCCESS(200, "BANCO_DELETED_SUCCESS", "Banco eliminado Correctamente."),
+    PERSONA_SUCCESS(200, "PERSONA_SUCCESS", "Persona creado Correctamente."),
+    PERSONA_GENERAL(200, "PERSONA_GENERAL", "Consulta Exitosa."),
+    PERSONA_UPDATED_SUCCESS(200, "PERSONA_UPDATED_SUCCESS", "Persona actualizado Correctamente."),
+    PERSONA_DELETED_SUCCESS(200, "PERSONA_DELETED_SUCCESS", "Persona eliminado Correctamente."),
+    EMPLEADO_SUCCESS(200, "EMPLEADO_SUCCESS", "Empleado creado Correctamente."),
+    EMPLEADO_GENERAL(200, "EMPLEADO_GENERAL", "Consulta Exitosa."),
+    EMPLEADO_UPDATED_SUCCESS(200, "EMPLEADO_UPDATED_SUCCESS", "Empleado actualizado Correctamente."),
+    EMPLEADO_DELETED_SUCCESS(200, "EMPLEADO_DELETED_SUCCESS", "Empleado eliminado Correctamente."),
     GENERO_SUCCESS(200, "GENERO_SUCCESS", "Genero creado Correctamente."),
     GENERO_GENERAL(200, "GENERAL_SUCCESS", "Consulta Exitosa."),
     GENERO_UPDATED_SUCCESS(200, "GENERAL_SUCCESS", "Genero actualizado Correctamente."),
@@ -32,6 +44,21 @@ public enum SuccessCode {
     STATUS_USUARIO_GENERAL(200, "STATUS_USUARIO_GENERAL", "Consulta exitosa."),
     STATUS_USUARIO_UPDATED_SUCCESS(200, "STATUS_USUARIO_UPDATED_SUCCESS", "Estatus de usuario actualizado correctamente."),
     STATUS_USUARIO_DELETED_SUCCESS(200, "STATUS_USUARIO_DELETED_SUCCESS", "Estatus de usuario eliminado correctamente."),
+
+    STATUS_EMPLEADO_SUCCESS(200, "STATUS_EMPLEADO_SUCCESS", "Estatus de empleado creado correctamente."),
+    STATUS_EMPLEADO_GENERAL(200, "STATUS_EMPLEADO_GENERAL", "Consulta exitosa."),
+    STATUS_EMPLEADO_UPDATED_SUCCESS(200, "STATUS_EMPLEADO_UPDATED_SUCCESS", "Estatus de empleado actualizado correctamente."),
+    STATUS_EMPLEADO_DELETED_SUCCESS(200, "STATUS_EMPLEADO_DELETED_SUCCESS", "Estatus de empleado eliminado correctamente."),
+
+    FLUJO_STATUS_EMPLEADO_SUCCESS(200, "FLUJO_STATUS_EMPLEADO_SUCCESS", "Flujo de estatus de empleado creado correctamente."),
+    FLUJO_STATUS_EMPLEADO_GENERAL(200, "FLUJO_STATUS_EMPLEADO_GENERAL", "Consulta exitosa."),
+    FLUJO_STATUS_EMPLEADO_UPDATED_SUCCESS(200, "FLUJO_STATUS_EMPLEADO_UPDATED_SUCCESS", "Flujo de estatus de empleado actualizado correctamente."),
+    FLUJO_STATUS_EMPLEADO_DELETED_SUCCESS(200, "FLUJO_STATUS_EMPLEADO_DELETED_SUCCESS", "Flujo de estatus de empleado eliminado correctamente."),
+
+    CUENTA_BANCARIA_EMPLEADO_SUCCESS(200, "CUENTA_BANCARIA_EMPLEADO_SUCCESS", "Cuenta bancaria de empleado creada correctamente."),
+    CUENTA_BANCARIA_EMPLEADO_GENERAL(200, "CUENTA_BANCARIA_EMPLEADO_GENERAL", "Consulta exitosa."),
+    CUENTA_BANCARIA_EMPLEADO_UPDATED_SUCCESS(200, "CUENTA_BANCARIA_EMPLEADO_UPDATED_SUCCESS", "Cuenta bancaria de empleado actualizada correctamente."),
+    CUENTA_BANCARIA_EMPLEADO_DELETED_SUCCESS(200, "CUENTA_BANCARIA_EMPLEADO_DELETED_SUCCESS", "Cuenta bancaria de empleado eliminada correctamente."),
 
     ROLE_GENERAL(200, "ROLE_GENERAL", "Operación de rol realizada con éxito."),
     ROLE_SUCCESS(201, "ROLE_SUCCESS", "Rol creado exitosamente."),
@@ -55,7 +82,27 @@ public enum SuccessCode {
     TIPO_ACCESO_SUCCESS(200, "TIPO_ACCESO_SUCCESS", "Tipo de acceso creado Correctamente."),
     TIPO_ACCESO_GENERAL(200, "TIPO_ACCESO_GENERAL", "Consulta Exitosa."),
     TIPO_ACCESO_UPDATED_SUCCESS(200, "TIPO_ACCESO_UPDATED_SUCCESS", "Tipo de acceso actualizado Correctamente."),
-    TIPO_ACCESO_DELETED_SUCCESS(200, "TIPO_ACCESO_DELETED_SUCCESS", "Tipo de acceso eliminado Correctamente.");
+    TIPO_ACCESO_DELETED_SUCCESS(200, "TIPO_ACCESO_DELETED_SUCCESS", "Tipo de acceso eliminado Correctamente."),
+
+    ESTADO_CIVIL_SUCCESS(200, "ESTADO_CIVIL_SUCCESS", "Estado civil creado Correctamente."),
+    ESTADO_CIVIL_GENERAL(200, "ESTADO_CIVIL_GENERAL", "Consulta Exitosa."),
+    ESTADO_CIVIL_UPDATED_SUCCESS(200, "ESTADO_CIVIL_UPDATED_SUCCESS", "Estado civil actualizado Correctamente."),
+    ESTADO_CIVIL_DELETED_SUCCESS(200, "ESTADO_CIVIL_DELETED_SUCCESS", "Estado civil eliminado Correctamente."),
+
+    DEPARTAMENTO_SUCCESS(200, "DEPARTAMENTO_SUCCESS", "Departamento creado Correctamente."),
+    DEPARTAMENTO_GENERAL(200, "DEPARTAMENTO_GENERAL", "Consulta Exitosa."),
+    DEPARTAMENTO_UPDATED_SUCCESS(200, "DEPARTAMENTO_UPDATED_SUCCESS", "Departamento actualizado Correctamente."),
+    DEPARTAMENTO_DELETED_SUCCESS(200, "DEPARTAMENTO_DELETED_SUCCESS", "Departamento eliminado Correctamente."),
+
+    PUESTO_SUCCESS(200, "PUESTO_SUCCESS", "Puesto creado Correctamente."),
+    PUESTO_GENERAL(200, "PUESTO_GENERAL", "Consulta Exitosa."),
+    PUESTO_UPDATED_SUCCESS(200, "PUESTO_UPDATED_SUCCESS", "Puesto actualizado Correctamente."),
+    PUESTO_DELETED_SUCCESS(200, "PUESTO_DELETED_SUCCESS", "Puesto eliminado Correctamente."),
+
+    TIPO_DOCUMENTO_SUCCESS(200, "TIPO_DOCUMENTO_SUCCESS", "Tipo de documento creado correctamente."),
+    TIPO_DOCUMENTO_GENERAL(200, "TIPO_DOCUMENTO_GENERAL", "Consulta exitosa."),
+    TIPO_DOCUMENTO_UPDATED_SUCCESS(200, "TIPO_DOCUMENTO_UPDATED_SUCCESS", "Tipo de documento actualizado correctamente."),
+    TIPO_DOCUMENTO_DELETED_SUCCESS(200, "TIPO_DOCUMENTO_DELETED_SUCCESS", "Tipo de documento eliminado correctamente.");
 
     private final int codigoNumerico;
     private final String codigoTexto;

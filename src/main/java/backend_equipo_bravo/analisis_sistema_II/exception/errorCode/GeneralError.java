@@ -10,6 +10,8 @@ public enum GeneralError {
     ERROR_PERSONA_NOT_FOUND(402, "ERROR_PERSONA_NOT_FOUND", "Persona no existe.", ""),
     ERROR_PUESTO_NOT_FOUND(402, "ERROR_PUESTO_NOT_FOUND", "Puesto no existe.", ""),
     ERROR_STATUS_NOT_FOUND(402, "ERROR_STATUS_NOT_FOUND", "estado no existe.", ""),
+    BANCO_NOT_FOUND(404, "BANCO_NOT_FOUND", "El banco no existe.", ""),
+    VALIDACION_DATOS(400, "VALIDACION_DATOS", "Los datos enviados no son válidos.", ""),
 
     STATUS_USER_NOT_FOUND(201, "STATUS_USER_NOT_FOUND", "El estatus de usuario no existe.", "El ID de estatus proporcionado no se encuentra registrado."),
 
@@ -27,7 +29,13 @@ public enum GeneralError {
 
     RANGO_FECHAS_INVALIDO(400, "RANGO_FECHAS_INVALIDO", "Rango de fechas inválido.", "La fecha final no puede ser anterior a la fecha inicial."),
     SOLAPAMIENTO_INASISTENCIA(400, "SOLAPAMIENTO_INASISTENCIA", "Conflicto de fechas.", "El empleado ya posee una inasistencia registrada que se cruza con el rango seleccionado."),
+    INASISTENCIA_PREVIA_CONTRATACION(400, "INASISTENCIA_PREVIA_CONTRATACION", "Fecha de inasistencia inválida: No se pueden registrar inasistencias en fechas anteriores a la fecha de contratación del empleado.", ""),
     TRANSICION_STATUS_INVALIDA(400, "TRANSICION_STATUS_INVALIDA", "Transición de estatus no permitida.", "El cambio de estatus no corresponde a una transición permitida en el flujo de estados."),
+
+    ESTADO_CIVIL_NOT_FOUND(404, "ESTADO_CIVIL_NOT_FOUND", "El estado civil no existe.", ""),
+    DEPARTAMENTO_NOT_FOUND(404, "DEPARTAMENTO_NOT_FOUND", "El departamento no existe.", ""),
+    EMPRESA_NOT_FOUND_CATALOGO(404, "EMPRESA_NOT_FOUND_CATALOGO", "La empresa seleccionada no existe.", ""),
+    NOMBRE_INVALIDO(400, "NOMBRE_INVALIDO", "El nombre es obligatorio y no puede superar 50 caracteres.", ""),
 
     ERROR_DEPENDENCY(409, "ERROR_DEPENDENCY", "El registro no se puede eliminar porque está siendo utilizado en otra parte del sistema.", "");
 

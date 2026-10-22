@@ -54,7 +54,7 @@ public class ReportePlanillaService extends BaseService<PlanillaCabecera, Object
         return construirRespuestaDesdeBase(cabecera);
     }
 
-    private PlanillaResponseDto construirRespuestaDesdeBase(PlanillaCabecera cabecera) {
+    public PlanillaResponseDto construirRespuestaDesdeBase(PlanillaCabecera cabecera) {
         List<PlanillaDetalle> detallesEntity = planillaDetalleRepository.findByAnioAndMes(cabecera.getAnio(), cabecera.getMes());
 
         List<PlanillaDetalleDto> detallesDto = detallesEntity.stream().map(d -> {

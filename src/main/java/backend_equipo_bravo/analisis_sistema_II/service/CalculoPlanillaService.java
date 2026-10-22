@@ -79,7 +79,7 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
 
             planillaDetalleRepository.deleteByAnioAndMes(request.getAnio(), request.getMes());
             planillaCabeceraRepository.deleteByAnioAndMes(request.getAnio(), request.getMes());
-        } else {
+        } else if (request.getIsFind()){
             PlanillaCabecera cabeceraExistente = planillaCabeceraRepository.findByAnioAndMes(request.getAnio(), request.getMes())
                     .orElseThrow(() -> new BusinessException(GeneralError.PLANILLA_NOT_FOUND));
 
@@ -162,7 +162,7 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
 
             BigDecimal descuentoIsr = empleado.getDescuentoIsr() != null ? empleado.getDescuentoIsr() : BigDecimal.ZERO;
 
-            BigDecimal descuentoInasistencias = procesarInasistencias(forzar, empleado.getIdEmpleado(), empleado.getIngresoSueldoBase(), periodo.getFechaInicio(), periodo.getFechaFin());
+            BigDecimal descuentoInasistencias = procesarInasistencias(forzar, empleado.getIdEmpleado(), empleado.getIngresoSueldoBase(), empleado.getFechaContratacion(), periodo.getFechaInicio(), periodo.getFechaFin());
 
             BigDecimal totalIngresosEmpleado = ingresoBase.add(ingresoBono).add(otrosIngresos);
             BigDecimal totalDescuentosEmpleado = descuentoIgss.add(descuentoIsr).add(descuentoInasistencias);
@@ -222,7 +222,7 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
         return new BigDecimal(diasTrabajados).divide(new BigDecimal(diasTotalesPeriodo), 4, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal procesarInasistencias(boolean forzar, Integer idEmpleado, BigDecimal salarioBaseFull, LocalDate inicioPeriodo, LocalDate finPeriodo) {
+    private BigDecimal procesarInasistencias(boolean forzar, Integer idEmpleado, BigDecimal salarioBaseFull, LocalDate fechaContratacion, LocalDate inicioPeriodo, LocalDate finPeriodo) {
         if (salarioBaseFull == null || salarioBaseFull.compareTo(BigDecimal.ZERO) <= 0) {
             return BigDecimal.ZERO;
         }
@@ -235,23 +235,41 @@ public class CalculoPlanillaService extends BaseService<PlanillaCabecera, Object
         BigDecimal salarioDiario = salarioBaseFull.divide(new BigDecimal("30"), 2, RoundingMode.HALF_UP);
         LocalDate fechaProceso = LocalDate.now();
 
+        LocalDate fechaInicioLaboral = (fechaContratacion != null && fechaContratacion.isAfter(inicioPeriodo))
+                ? fechaContratacion
+                : inicioPeriodo;
+
         for (Inasistencia inasistencia : inasistenciasPendientes) {
             LocalDate incInicio = inasistencia.getFechaInicial();
             LocalDate incFin = inasistencia.getFechaFinal();
 
             if (!incInicio.isAfter(finPeriodo) && !incFin.isBefore(inicioPeriodo)) {
 
-                LocalDate inicioEfectivo = incInicio.isBefore(inicioPeriodo) ? inicioPeriodo : incInicio;
-                LocalDate finEfectivo = incFin.isAfter(finPeriodo) ? finPeriodo : incFin;
-
-                long diasAusenteEnPeriodo = ChronoUnit.DAYS.between(inicioEfectivo, finEfectivo) + 1;
-
-                if (diasAusenteEnPeriodo > 30) {
-                    diasAusenteEnPeriodo = 30;
+                // Si toda la inasistencia ocurrió antes de la contratación del empleado, no se debe descontar
+                if (fechaContratacion != null && incFin.isBefore(fechaContratacion)) {
+                    if (!incFin.isAfter(finPeriodo)) {
+                        inasistencia.setFechaProcesado(fechaProceso);
+                        inasistencia.setFechaModificacion(LocalDateTime.now());
+                        inasistencia.setUsuarioModificacion(obtenerUsuarioAutenticado());
+                        inasistenciaRepository.save(inasistencia);
+                    }
+                    continue;
                 }
 
-                BigDecimal descuentoPeriodo = salarioDiario.multiply(new BigDecimal(diasAusenteEnPeriodo));
-                totalDescuento = totalDescuento.add(descuentoPeriodo);
+                // El inicio efectivo a descontar no puede ser previo a la fecha de contratación
+                LocalDate inicioEfectivo = incInicio.isBefore(fechaInicioLaboral) ? fechaInicioLaboral : incInicio;
+                LocalDate finEfectivo = incFin.isAfter(finPeriodo) ? finPeriodo : incFin;
+
+                if (!inicioEfectivo.isAfter(finEfectivo)) {
+                    long diasAusenteEnPeriodo = ChronoUnit.DAYS.between(inicioEfectivo, finEfectivo) + 1;
+
+                    if (diasAusenteEnPeriodo > 30) {
+                        diasAusenteEnPeriodo = 30;
+                    }
+
+                    BigDecimal descuentoPeriodo = salarioDiario.multiply(new BigDecimal(diasAusenteEnPeriodo));
+                    totalDescuento = totalDescuento.add(descuentoPeriodo);
+                }
 
                 if (!incFin.isAfter(finPeriodo)) {
                     inasistencia.setFechaProcesado(fechaProceso);
