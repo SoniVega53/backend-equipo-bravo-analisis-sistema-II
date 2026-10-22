@@ -29,6 +29,48 @@ import java.util.stream.Collectors;
 @Service
 public class LiquidacionService extends BaseService<Liquidacion, Integer> {
 
+
+    /** Factor de sueldos anuales para indemnización (14 salarios: 12 ordinarios + 1 bono 14 + 1 aguinaldo) */
+    public static final BigDecimal FACTOR_SUELDOS_INDEMNIZACION = new BigDecimal("14");
+
+    /** Meses del año calendario para promediar salarios de indemnización (12 meses) */
+    public static final BigDecimal MESES_DEL_ANIO = new BigDecimal("12");
+
+    /** Días del año calendario base para cálculo proporcional diario de prestaciones (365 días) */
+    public static final BigDecimal DIAS_DEL_ANIO = new BigDecimal("365");
+
+    /** Días base del mes comercial / laboral para cálculo de salario diario (30 días) */
+    public static final BigDecimal DIAS_MES_COMERCIAL = new BigDecimal("30");
+
+    /** Tope máximo de días laborables computables en el mes de egreso para salario pendiente (30 días) */
+    public static final int DIAS_MAXIMOS_MES_PENDIENTE = 30;
+
+    /** Días de vacaciones remuneradas por año laborado según Código de Trabajo (15 días) */
+    public static final BigDecimal DIAS_VACACIONES_POR_ANIO = new BigDecimal("15");
+
+    /** Porcentaje de descuento por cuota laboral del IGSS (4.83% -> 0.0483) */
+    public static final BigDecimal PORCENTAJE_CUOTA_LABORAL_IGSS = new BigDecimal("0.0483");
+
+    /** Monto mensual legal de Bonificación Incentivo por Decreto (Q250.00) */
+    public static final BigDecimal BONIFICACION_DECRETO_MENSUAL = new BigDecimal("250");
+
+    /** Mes y día de inicio del período computable para Aguinaldo (1 de diciembre) */
+    public static final int MES_INICIO_AGUINALDO = 12;
+    public static final int DIA_INICIO_AGUINALDO = 1;
+
+    /** Mes y día de inicio del período computable para Bono 14 (1 de julio) */
+    public static final int MES_INICIO_BONO_14 = 7;
+    public static final int DIA_INICIO_BONO_14 = 1;
+
+    /** Escala decimal para cálculos intermedios (precisión de 4 decimales) */
+    public static final int ESCALA_CALCULO_INTERMEDIO = 4;
+
+    /** Escala decimal estándar para montos monetarios finales (2 decimales) */
+    public static final int ESCALA_MONEDA = 2;
+
+    /** Modo de redondeo estándar para cálculos financieros */
+    public static final RoundingMode MODO_REDONDEO = RoundingMode.HALF_UP;
+
     @Autowired
     private LiquidacionRepository liquidacionRepository;
     @Autowired
@@ -182,7 +224,6 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         liquidacion.setMotivoEgreso(motivoEgresoDB.get());
         liquidacion.setIdPuesto(request.getIdPuesto() != null ? request.getIdPuesto() : empleado.getIdPuesto());
 
-        // 1. SET THE RAW BASE COLUMNS EXACTLY AS TYPED IN THE FORM
         liquidacion.setIngresoSueldoBase(valorOZero(request.getIngresoSueldoBase()));
         liquidacion.setIngresoBonificacionDecreto(valorOZero(request.getIngresoBonificacionDecreto()));
         liquidacion.setIngresoOtrosIngresos(valorOZero(request.getIngresoOtrosIngresos()));
@@ -263,10 +304,13 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         dto.setDiasLaboradosTotal(diasTotales);
 
         // Indemnización
-        BigDecimal salarioPromedioIndemnizacion = salarioBase.multiply(new BigDecimal("14")).divide(new BigDecimal("12"), 2, RoundingMode.HALF_UP);
+        BigDecimal salarioPromedioIndemnizacion = salarioBase.multiply(FACTOR_SUELDOS_INDEMNIZACION)
+                .divide(MESES_DEL_ANIO, ESCALA_MONEDA, MODO_REDONDEO);
         BigDecimal montoIndemnizacion = BigDecimal.ZERO;
         if (calcIndemnizacion) {
-            montoIndemnizacion = salarioPromedioIndemnizacion.divide(new BigDecimal("365"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasTotales)).setScale(2, RoundingMode.HALF_UP);
+            montoIndemnizacion = salarioPromedioIndemnizacion.divide(DIAS_DEL_ANIO, ESCALA_CALCULO_INTERMEDIO, MODO_REDONDEO)
+                    .multiply(new BigDecimal(diasTotales))
+                    .setScale(ESCALA_MONEDA, MODO_REDONDEO);
         }
         dto.setMontoIndemnizacion(montoIndemnizacion);
 
@@ -274,11 +318,15 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         BigDecimal montoAguinaldo = BigDecimal.ZERO;
         int diasAguinaldo = 0;
         if (calcAguinaldo) {
-            LocalDate inicioAguinaldo = egreso.getMonthValue() == 12 ? LocalDate.of(egreso.getYear(), 12, 1) : LocalDate.of(egreso.getYear() - 1, 12, 1);
+            LocalDate inicioAguinaldo = egreso.getMonthValue() == MES_INICIO_AGUINALDO
+                    ? LocalDate.of(egreso.getYear(), MES_INICIO_AGUINALDO, DIA_INICIO_AGUINALDO)
+                    : LocalDate.of(egreso.getYear() - 1, MES_INICIO_AGUINALDO, DIA_INICIO_AGUINALDO);
             if (inicioAguinaldo.isBefore(contratacion)) inicioAguinaldo = contratacion;
             diasAguinaldo = (int) ChronoUnit.DAYS.between(inicioAguinaldo, egreso) + 1;
-            if(diasAguinaldo < 0) diasAguinaldo = 0;
-            montoAguinaldo = salarioBase.divide(new BigDecimal("365"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasAguinaldo)).setScale(2, RoundingMode.HALF_UP);
+            if (diasAguinaldo < 0) diasAguinaldo = 0;
+            montoAguinaldo = salarioBase.divide(DIAS_DEL_ANIO, ESCALA_CALCULO_INTERMEDIO, MODO_REDONDEO)
+                    .multiply(new BigDecimal(diasAguinaldo))
+                    .setScale(ESCALA_MONEDA, MODO_REDONDEO);
         }
         dto.setDiasProporcionalesAguinaldo(diasAguinaldo);
         dto.setMontoAguinaldo(montoAguinaldo);
@@ -287,11 +335,15 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         BigDecimal montoBono14 = BigDecimal.ZERO;
         int diasBono14 = 0;
         if (calcBono14) {
-            LocalDate inicioBono14 = egreso.getMonthValue() >= 7 ? LocalDate.of(egreso.getYear(), 7, 1) : LocalDate.of(egreso.getYear() - 1, 7, 1);
+            LocalDate inicioBono14 = egreso.getMonthValue() >= MES_INICIO_BONO_14
+                    ? LocalDate.of(egreso.getYear(), MES_INICIO_BONO_14, DIA_INICIO_BONO_14)
+                    : LocalDate.of(egreso.getYear() - 1, MES_INICIO_BONO_14, DIA_INICIO_BONO_14);
             if (inicioBono14.isBefore(contratacion)) inicioBono14 = contratacion;
             diasBono14 = (int) ChronoUnit.DAYS.between(inicioBono14, egreso) + 1;
-            if(diasBono14 < 0) diasBono14 = 0;
-            montoBono14 = salarioBase.divide(new BigDecimal("365"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasBono14)).setScale(2, RoundingMode.HALF_UP);
+            if (diasBono14 < 0) diasBono14 = 0;
+            montoBono14 = salarioBase.divide(DIAS_DEL_ANIO, ESCALA_CALCULO_INTERMEDIO, MODO_REDONDEO)
+                    .multiply(new BigDecimal(diasBono14))
+                    .setScale(ESCALA_MONEDA, MODO_REDONDEO);
         }
         dto.setDiasProporcionalesBono14(diasBono14);
         dto.setMontoBono14(montoBono14);
@@ -303,8 +355,11 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
             int aniosCompletos = Period.between(contratacion, egreso).getYears();
             LocalDate ultimoAniversario = contratacion.plusYears(aniosCompletos);
             diasVacaciones = (int) ChronoUnit.DAYS.between(ultimoAniversario, egreso) + 1;
-            if(diasVacaciones < 0) diasVacaciones = 0;
-            montoVacaciones = salarioBase.divide(new BigDecimal("30"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal("15")).multiply(new BigDecimal(diasVacaciones)).divide(new BigDecimal("365"), 2, RoundingMode.HALF_UP);
+            if (diasVacaciones < 0) diasVacaciones = 0;
+            montoVacaciones = salarioBase.divide(DIAS_MES_COMERCIAL, ESCALA_CALCULO_INTERMEDIO, MODO_REDONDEO)
+                    .multiply(DIAS_VACACIONES_POR_ANIO)
+                    .multiply(new BigDecimal(diasVacaciones))
+                    .divide(DIAS_DEL_ANIO, ESCALA_MONEDA, MODO_REDONDEO);
         }
         dto.setDiasProporcionalesVacaciones(diasVacaciones);
         dto.setMontoVacaciones(montoVacaciones);
@@ -313,11 +368,16 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         BigDecimal montoSalarioPendiente = BigDecimal.ZERO;
         BigDecimal montoBonoDecreto = BigDecimal.ZERO;
         BigDecimal descuentoIgss = BigDecimal.ZERO;
-        int diasPendientes = Math.min(egreso.getDayOfMonth(), 30);
+        int diasPendientes = Math.min(egreso.getDayOfMonth(), DIAS_MAXIMOS_MES_PENDIENTE);
         if (calcSalario) {
-            montoSalarioPendiente = salarioBase.divide(new BigDecimal("30"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasPendientes)).setScale(2, RoundingMode.HALF_UP);
-            montoBonoDecreto = new BigDecimal("250").divide(new BigDecimal("30"), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(diasPendientes)).setScale(2, RoundingMode.HALF_UP);
-            descuentoIgss = montoSalarioPendiente.multiply(new BigDecimal("0.0483")).setScale(2, RoundingMode.HALF_UP);
+            montoSalarioPendiente = salarioBase.divide(DIAS_MES_COMERCIAL, ESCALA_CALCULO_INTERMEDIO, MODO_REDONDEO)
+                    .multiply(new BigDecimal(diasPendientes))
+                    .setScale(ESCALA_MONEDA, MODO_REDONDEO);
+            montoBonoDecreto = BONIFICACION_DECRETO_MENSUAL.divide(DIAS_MES_COMERCIAL, ESCALA_CALCULO_INTERMEDIO, MODO_REDONDEO)
+                    .multiply(new BigDecimal(diasPendientes))
+                    .setScale(ESCALA_MONEDA, MODO_REDONDEO);
+            descuentoIgss = montoSalarioPendiente.multiply(PORCENTAJE_CUOTA_LABORAL_IGSS)
+                    .setScale(ESCALA_MONEDA, MODO_REDONDEO);
         }
         dto.setDiasPendientesPago(diasPendientes);
         dto.setMontoSalarioPendiente(montoSalarioPendiente);
@@ -373,7 +433,6 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
         if (entidad.getFechaContratacion() != null && entidad.getFechaEgreso() != null && entidad.getIngresoSueldoBase().compareTo(BigDecimal.ZERO) > 0) {
             LiquidacionDto desglose = calcularDesglose(entidad.getIngresoSueldoBase(), entidad.getFechaContratacion(), entidad.getFechaEgreso(), true, true, true, true, true);
             
-            // Adivinar la combinación exacta de banderas (true/false) que produjo este TotalIngresos
             BigDecimal valSalarioTrue = valorOZero(desglose.getMontoSalarioPendiente()).add(valorOZero(desglose.getMontoBonificacionDecretoPendiente()));
             BigDecimal valSalarioFalse = valorOZero(entidad.getIngresoSueldoBase()).add(valorOZero(entidad.getIngresoBonificacionDecreto()));
             BigDecimal valOtros = valorOZero(entidad.getIngresoOtrosIngresos());
@@ -407,7 +466,6 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
                 }
             }
 
-            // Si por alguna razón matemática no cuadra exacto, asumimos que todas están en false (puros crudos del form)
             if (!found) {
                 cSal = false; cInd = false; cAgu = false; cBon = false; cVac = false;
             }
@@ -417,7 +475,6 @@ public class LiquidacionService extends BaseService<Liquidacion, Integer> {
                 desglose.setMontoSalarioPendiente(entidad.getIngresoSueldoBase());
                 desglose.setMontoBonificacionDecretoPendiente(entidad.getIngresoBonificacionDecreto());
                 desglose.setDescuentoIgss(entidad.getDescuentoIgss());
-                // No anulamos los días, mantenemos la variable procesada (topada a 30)
             }
             if (!cInd) { desglose.setMontoIndemnizacion(BigDecimal.ZERO); }
             if (!cAgu) { desglose.setMontoAguinaldo(BigDecimal.ZERO); desglose.setDiasProporcionalesAguinaldo(0); }

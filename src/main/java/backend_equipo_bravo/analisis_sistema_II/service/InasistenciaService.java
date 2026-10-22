@@ -58,10 +58,14 @@ public class InasistenciaService extends BaseService<Inasistencia, Integer> {
 
     @Transactional
     public InasistenciaResponseDto crearInasistencia(InasistenciaRequestDto request) {
-        validarRangoFechas(request,null);
+        if (request.getIdEmpleado() == null) {
+            throw new BusinessException(GeneralError.ERROR_SERVICE);
+        }
 
         Empleado empleado = empleadoRepository.findById(request.getIdEmpleado())
-                .orElseThrow(() -> new BusinessException(GeneralError.ERROR_SERVICE));
+                .orElseThrow(() -> new BusinessException(GeneralError.ERROR_EMPLEADO_NOT_FOUND));
+
+        validarRangoFechas(request, null, empleado);
 
         Inasistencia inasistencia = new Inasistencia();
         inasistencia.setIdEmpleado(empleado.getIdEmpleado());
@@ -82,10 +86,16 @@ public class InasistenciaService extends BaseService<Inasistencia, Integer> {
         Inasistencia inasistencia = buscarPorId(id);
 
         if (inasistencia.getFechaProcesado() != null) {
-            throw new BusinessException(GeneralError.ERROR_SERVICE);
+            throw new BusinessException(GeneralError.INASISTENCIA_PROCESS);
         }
 
-        validarRangoFechas(request,id);
+        Integer idEmpleado = request.getIdEmpleado() != null ? request.getIdEmpleado() : inasistencia.getIdEmpleado();
+        request.setIdEmpleado(idEmpleado);
+
+        Empleado empleado = empleadoRepository.findById(idEmpleado)
+                .orElseThrow(() -> new BusinessException(GeneralError.ERROR_EMPLEADO_NOT_FOUND));
+
+        validarRangoFechas(request, id, empleado);
 
         inasistencia.setFechaInicial(request.getFechaInicio());
         inasistencia.setFechaFinal(request.getFechaFin());
@@ -109,13 +119,19 @@ public class InasistenciaService extends BaseService<Inasistencia, Integer> {
         return eliminarBasePermisos(id);
     }
 
-    private void validarRangoFechas(InasistenciaRequestDto request, Integer idInasistenciaActual) {
+    private void validarRangoFechas(InasistenciaRequestDto request, Integer idInasistenciaActual, Empleado empleado) {
         if (request.getFechaInicio() == null || request.getFechaFin() == null) {
             throw new BusinessException(GeneralError.ERROR_SERVICE);
         }
 
         if (request.getFechaFin().isBefore(request.getFechaInicio())) {
             throw new BusinessException(GeneralError.RANGO_FECHAS_INVALIDO);
+        }
+
+        if (empleado != null && empleado.getFechaContratacion() != null) {
+            if (request.getFechaInicio().isBefore(empleado.getFechaContratacion())) {
+                throw new BusinessException(GeneralError.INASISTENCIA_PREVIA_CONTRATACION);
+            }
         }
 
         boolean existeCruce;
